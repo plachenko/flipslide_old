@@ -27,13 +27,11 @@ export default {
     mounted(){
         this.canvas = this.$refs.canvas
         this.context = this.canvas.getContext('2d')
-        // this.points.push({x: 100, y:100})
 
         this.sizeCanvas()
 
         window.addEventListener('contextmenu', this.contextEvt)
         window.addEventListener('resize', this.resizeEvt)
-
     },
     watch: {
         points: {
@@ -70,6 +68,7 @@ export default {
                     break
             }
             */
+            /*
             switch(e.which){
                 case 1:
                     this.mdown[0] = true
@@ -86,8 +85,11 @@ export default {
                     Vue.set(this.savePoints, 1, {x: e.clientX, y: e.clientY})
                     break
             }
+            */
         },
         mvEvt(e) {
+            Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
+            /*
             if(this.mdown[0] === true){
                 Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
             }
@@ -114,8 +116,10 @@ export default {
                 Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
                 Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
             }
+            */
         },
         upEvt(e) {
+            /*
             switch(e.which){
                 case 1:
                     this.mdown[0] = false
@@ -130,6 +134,7 @@ export default {
 
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height)
             this.$eh.$emit('set')
+            */
         },
 
         sizeCanvas() {
@@ -163,10 +168,7 @@ export default {
             let soh = 0
             
 
-            // SOHCAHTOA
-
             if(this.points.length > 1 && this.points[0] !== undefined){
-
 
                 xDiff = this.points[1].x - this.points[0].x
                 yDiff = this.points[1].y - this.points[0].y
@@ -179,7 +181,6 @@ export default {
                 c2Diff = Math.pow(x2Diff, 2) + Math.pow(y2Diff,2)
 
                 scaler = Math.sqrt(cDiff) / Math.sqrt(c2Diff)  
-                // console.log(scaler)
 
                 this.$eh.$emit('rotater', soh) 
                 this.$eh.$emit('scaler', scaler) 
@@ -189,63 +190,53 @@ export default {
 
                 _ctx.strokeStyle = "#000"
 
-                // Draw soh
-                _ctx.fillText(soh+"", this.points[0].x, this.points[0].y)
 
-                // Draw angles
-                _ctx.fillText(yDiff+"", this.points[0].x, _midY + 20)
-                _ctx.fillText(xDiff+"", _midX - 30, this.points[1].y)
+                this.drawRotation()
+                this.drawAngles()
+            }
 
-                _ctx.beginPath()
-                _ctx.moveTo(this.points[0].x, this.points[0].y)
-                _ctx.lineTo(this.points[0].x, this.points[1].y)
-                _ctx.lineTo(this.points[1].x, this.points[1].y)
-                _ctx.stroke()
-                _ctx.closePath()
+            this.drawPoints()
+        },
+        drawRotation(){
+            //Draw OverCircle
+            _ctx.beginPath()
+            _ctx.arc(_midX, _midY, Math.sqrt(cDiff)/2, 0, Math.PI *2)
+            _ctx.stroke()
+            _ctx.closePath()
 
-                // Draw Midpoint
-                _ctx.fillText(Math.round(Math.sqrt(cDiff))+"", _midX, _midY - 25)
-
+            // Draw Ticks.
+            for(var i = 0; i <= 10; i ++) {
+                let _x1 = 
                 _ctx.beginPath()
                 _ctx.moveTo(_midX, _midY)
                 _ctx.lineTo(_midX, _midY - 20)
                 _ctx.stroke()
                 _ctx.closePath()
-
-                //Draw OverCircle
-                _ctx.beginPath()
-                _ctx.arc(_midX, _midY, Math.sqrt(cDiff)/2, 0, Math.PI *2)
-                _ctx.stroke()
-                _ctx.closePath()
-
-                for(var i = 0; i <= 10; i ++) {
-                    let _x1 = 
-                    _ctx.beginPath()
-                    _ctx.moveTo(_midX, _midY)
-                    _ctx.lineTo(_midX, _midY - 20)
-                    _ctx.stroke()
-                    _ctx.closePath()
-                }
-
-                //Draw line
-                _ctx.beginPath()
-                _ctx.moveTo(this.points[0].x, this.points[0].y)
-                _ctx.lineTo(this.points[1].x, this.points[1].y)
-                _ctx.stroke()
-                _ctx.closePath()
-
             }
+        },
+        drawAngles() {
+            // Draw the control triangle
+            _ctx.fillText(yDiff+"", this.points[0].x, _midY + 20)
+            _ctx.fillText(xDiff+"", _midX - 30, this.points[1].y)
+            _ctx.fillText(Math.round(Math.sqrt(cDiff))+"", _midX, _midY - 25)
 
-            /*
-            this.savePoints.forEach((point, ind) => {
-                _ctx.strokeStyle = colors[ind]
-                _ctx.beginPath()
-                _ctx.arc(point.x, point.y, 20, 0, Math.PI * 2)
-                _ctx.stroke()
-                _ctx.closePath()
-            })
-            */
+            _ctx.fillText(soh+"", this.points[0].x, this.points[0].y)
 
+            _ctx.beginPath()
+            _ctx.moveTo(this.points[0].x, this.points[0].y)
+            _ctx.lineTo(this.points[1].x, this.points[1].y)
+            _ctx.lineTo(this.points[0].x, this.points[1].y)
+            _ctx.lineTo(this.points[1].x, this.points[1].y)
+            _ctx.stroke()
+            _ctx.closePath()
+
+            _ctx.beginPath()
+            _ctx.moveTo(_midX, _midY)
+            _ctx.lineTo(_midX, _midY - 20)
+            _ctx.stroke()
+            _ctx.closePath()
+        },
+        drawPoints() {
             this.points.forEach((point, ind) => {
                 _ctx.strokeStyle = colors[ind]
                 _ctx.fillText(ind+"", point.x, point.y - 55)
@@ -254,7 +245,6 @@ export default {
                 _ctx.stroke()
                 _ctx.closePath()
             })
-
         }
     }
 }
