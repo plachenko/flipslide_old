@@ -52,6 +52,24 @@ export default {
         },
 
         dnEvt(e) {
+            /*
+            Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
+            Vue.set(this.savePoints, 0, {x: e.clientX, y: e.clientY})
+            Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
+            Vue.set(this.savePoints, 1, {x: e.clientX, y: e.clientY})
+
+            switch(e.which){
+                case 1:
+                    this.mdown[0] = true
+                    break
+                case 2:
+                    this.mdown[2] = true
+                    break
+                case 3:
+                    this.mdown[1] = true
+                    break
+            }
+            */
             switch(e.which){
                 case 1:
                     this.mdown[0] = true
@@ -154,7 +172,7 @@ export default {
                 yDiff = this.points[1].y - this.points[0].y
                 cDiff = Math.pow(xDiff, 2) + Math.pow(yDiff,2)
 
-                soh = Math.asin(yDiff/Math.sqrt(cDiff)) * (180 / Math.PI)
+                soh = Math.asin(yDiff/Math.sqrt(cDiff)) * (180 / (Math.PI))
 
                 x2Diff = this.savePoints[1].x - this.savePoints[0].x
                 y2Diff = this.savePoints[1].y - this.savePoints[0].y
