@@ -16,6 +16,7 @@ export default {
             context: null,
             points: [],
             savePoints: [],
+            pointers: [],
             mdown: [
                 false,
                 false,
@@ -80,8 +81,6 @@ export default {
                 let xOffset = e.clientX - this.points[2].x
                 let yOffset = e.clientY - this.points[2].y
 
-                console.log('moving...')
-
                 // let _x1 = xOffset + this.points[0].x
                 // let _y1 = yOffset + this.points[0].y
                 // let _x2 = xOffset + this.points[1].x
@@ -112,6 +111,7 @@ export default {
             }
 
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height)
+            this.$eh.$emit('set')
         },
 
         sizeCanvas() {
@@ -128,6 +128,7 @@ export default {
             let _can = this.canvas
             let _ctx = this.context
 
+
             _ctx.clearRect(0, 0, _can.width, _can.height)
             let colors = ['#FF0000', '#0000FF']
 
@@ -135,18 +136,42 @@ export default {
             let yDiff = 0 
             let cDiff = 0
 
+            let x2Diff = 0 
+            let y2Diff = 0 
+            let c2Diff = 0
+
+            let scaler = 0
+
+            let soh = 0
+            
+
             // SOHCAHTOA
 
             if(this.points.length > 1 && this.points[0] !== undefined){
+
 
                 xDiff = this.points[1].x - this.points[0].x
                 yDiff = this.points[1].y - this.points[0].y
                 cDiff = Math.pow(xDiff, 2) + Math.pow(yDiff,2)
 
+                soh = Math.asin(Math.abs(yDiff)/Math.abs(cDiff))
+
+                x2Diff = this.savePoints[1].x - this.savePoints[0].x
+                y2Diff = this.savePoints[1].y - this.savePoints[0].y
+                c2Diff = Math.pow(x2Diff, 2) + Math.pow(y2Diff,2)
+
+                scaler = Math.sqrt(cDiff) / Math.sqrt(c2Diff)  
+                // console.log(scaler)
+
+                this.$eh.$emit('scaler', scaler) 
+
                 let _midX = (xDiff / 2) + this.points[0].x 
                 let _midY = (yDiff / 2) + this.points[0].y 
 
                 _ctx.strokeStyle = "#000"
+
+                // Draw soh
+                _ctx.fillText(soh+"", this.points[0].x, this.points[0].y)
 
                 // Draw angles
                 _ctx.fillText(yDiff+"", this.points[0].x, _midY + 20)

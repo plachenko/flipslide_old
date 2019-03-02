@@ -6,7 +6,10 @@
     </div>
     -->
     <FSControl />
-    <div ref="can" id="canvas-container">
+    <span style="position: absolute; top: 0px; left: 0px; z-index: 9999">
+      {{scale}}
+    </span>
+    <div ref="can" :style="{transform: 'scale('+scale+','+scale+')'}" id="canvas-container">
       <!--
       <div class="handle tb" v-for="(i, idx) in 2" :key="idx" :style="{ }"></div>
       <div class="handle rl" style="top: -30px;"></div>
@@ -36,10 +39,33 @@ export default {
     this.centerCanvas()
 
     window.addEventListener('resize', this.resizeEvt)
+    this.$eh.$on('set', () => {
+    })
+
+    this.$eh.$on('scaler', (e)=>{
+      this.scale = e
+      /*
+      if(e > 1){
+        this.scale += e
+        console.log('zoom in!')
+      } else {
+        this.scale += 1 - e
+        console.log('zoomOut')
+      }
+      /*
+      if(e < 1){
+      } else {
+        this.scale -= e
+      }
+      */
+    })
   },
   data() {
     return{
-      canvas_container: null
+      canvas_container: null,
+      width: 0,
+      scale: 1,
+      temp_scale: 0
     }
   },
   methods: {
@@ -52,6 +78,8 @@ export default {
       let margin = 30
       let _w = window.innerWidth - margin
       let _h = window.innerHeight - margin
+
+      this.width = _w
 
       _can.style.width = _w + "px"
       _can.style.height = _h + "px"
@@ -70,6 +98,11 @@ export default {
 </script>
 
 <style>
+html{
+  touch-action: none;
+  overflow: hidden;
+}
+
 body{
   margin: 0px;
   background-color: #AAA;
