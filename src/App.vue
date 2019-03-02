@@ -9,7 +9,8 @@
     <span style="position: absolute; top: 0px; left: 0px; z-index: 9999">
       {{scale}}
     </span>
-    <div ref="can" :style="{transform: 'scale('+scale+','+scale+')'}" id="canvas-container">
+    <div ref="can" :style="{transform: 'rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
+    <!-- <div ref="can" :style="{transform: 'matrix('+scale+','+rotation+','+(-1*rotation)+','+scale+',0,0)'}" id="canvas-container"> -->
       <!--
       <div class="handle tb" v-for="(i, idx) in 2" :key="idx" :style="{ }"></div>
       <div class="handle rl" style="top: -30px;"></div>
@@ -42,6 +43,16 @@ export default {
     this.$eh.$on('set', () => {
     })
 
+    this.$eh.$on('rotater', (e)=>{
+      this.rotation = e
+
+    })
+
+    setInterval(() => {
+      // this.scale -= Math.sin()
+      // this.rotation += 1
+    }, 1000)
+
     this.$eh.$on('scaler', (e)=>{
       this.scale = e
       /*
@@ -65,7 +76,8 @@ export default {
       canvas_container: null,
       width: 0,
       scale: 1,
-      temp_scale: 0
+      temp_scale: 0,
+      rotation: 0
     }
   },
   methods: {

@@ -154,7 +154,7 @@ export default {
                 yDiff = this.points[1].y - this.points[0].y
                 cDiff = Math.pow(xDiff, 2) + Math.pow(yDiff,2)
 
-                soh = Math.asin(Math.abs(yDiff)/Math.abs(cDiff))
+                soh = Math.asin(yDiff/Math.sqrt(cDiff)) * (180 / Math.PI)
 
                 x2Diff = this.savePoints[1].x - this.savePoints[0].x
                 y2Diff = this.savePoints[1].y - this.savePoints[0].y
@@ -163,6 +163,7 @@ export default {
                 scaler = Math.sqrt(cDiff) / Math.sqrt(c2Diff)  
                 // console.log(scaler)
 
+                this.$eh.$emit('rotater', soh) 
                 this.$eh.$emit('scaler', scaler) 
 
                 let _midX = (xDiff / 2) + this.points[0].x 
