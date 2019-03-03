@@ -1,7 +1,6 @@
 <template>
     <div>
         <div @pointerdown="dnEvt" @pointermove="mvEvt" @pointerup="upEvt" id="FSPointer" ref="capture" />
-        <span style="position: absolute; right: 0px; z-index: 9999; top: 0px;">{{type}}</span>
         <canvas id="canvas" ref="canvas" />
     </div>
 </template>
@@ -17,12 +16,6 @@ export default {
             context: null,
             mousePos: null,
             points: [],
-            mdown: [
-                false,
-                false,
-                false
-            ],
-            type: null
         }
     },
     mounted(){
@@ -39,17 +32,9 @@ export default {
             // Rise
             return this.points[1].y - this.points[0].y
         },
-        midY: function() {
-            // Mid Rise
-            return (this.yDiff / 2) + this.points[0].x
-        },
         xDiff: function() {
             // Run
             return this.points[1].x - this.points[0].x
-        },
-        midX: function() {
-            // Mid Run
-            return (this.xDiff / 2) + this.points[0].y
         },
         hyp: function() {
             //Hypotenuse
@@ -85,98 +70,21 @@ export default {
         },
 
         dnEvt(e) {
-            /*
-           let _pointIdx = this.points.length
-           let _pointObj = {
-               id: e.pointerId,
-               type: e.which,
-               x: e.clientX,
-               y: e.clientY
-            }
-
-            Vue.set(this.points, _pointIdx, _pointObj)
-            console.log(this.points)
-            */
-
-            // Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
-            // Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
-
-/*
-            switch(e.which){
-                case 1:
-                    this.mdown[0] = true
-                    Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
-                    break
-                case 2:
-                    this.mdown[2] = true
-                    Vue.set(this.points, 2, {x: e.clientX, y: e.clientY})
-                    break
-                case 3:
-                    this.mdown[1] = true
-                    Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
-                    Vue.set(this.savePoints, 1, {x: e.clientX, y: e.clientY})
-                    break
-            }
-            */
-           this.type = e.which
+            // Capture the pointer
+            Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
+            Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
         },
         mvEvt(e) {
-            console.log(this.mouseArray)
-            /*
-            if(!this.points.length){
+            // If there is no pointer down, set mouse position
+            if(this.points[0] && this.points[1]){
+                Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
+            } else {
                 this.mousePos = {x: e.clientX, y: e.clientY}
             }
-
-            if(this.mdown[0] === true){
-                Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
-            }
-            if(this.mdown[1] === true){
-                Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
-            }
-            */
-
-            // Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
-
-            /*
-            if(this.mdown[2] === true){
-                let xOffset = e.clientX - this.points[2].x
-                let yOffset = e.clientY - this.points[2].y
-
-                // let _x1 = xOffset + this.points[0].x
-                // let _y1 = yOffset + this.points[0].y
-                // let _x2 = xOffset + this.points[1].x
-                // let _y2 = yOffset + this.points[1].y
-
-                // Vue.set(this.points, 0, {x: this.points[0].x += xOffset, y: this.points[0].y += yOffset})
-                // Vue.set(this.points, 1, {x: this.points[1].x += xOffset, y: this.points[1].y += yOffset})
-            }
-
-            // console.log(this.mdown[0], this.mdown[1])
-
-            if(this.mdown[0] === true && this.mdown[1] === true){
-                Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
-                Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
-            }
-            */
         },
         upEvt(e) {
-            /*
-            console.log(this.points)
-            this.points.some((i,idx) => {
-                this.points.splice(idx,1)
-            })
-            */
-            switch(e.which){
-                case 1:
-                    this.mdown[0] = false
-                    break
-                case 2:
-                    this.mdown[2] = false
-                    break
-                case 3:
-                    this.mdown[1] = false
-                    break
-            }
+            // Clear the canvas.
+            this.points = []
 
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height)
         },
@@ -209,6 +117,7 @@ export default {
         drawMouse() {
             let _ctx = this.context
 
+            _ctx.strokeStyle = "#000"
             _ctx.beginPath()
             _ctx.arc(this.mousePos.x, this.mousePos.y, 50, 0, Math.PI * 2)
             _ctx.stroke()
@@ -219,7 +128,6 @@ export default {
             let colors = ["#FF0000", "#0000FF"]
 
             this.points.forEach((point, ind) => {
-                console.log(point)
                 _ctx.strokeStyle = colors[ind]
                 _ctx.fillText(ind, point.x, point.y - 55)
                 _ctx.beginPath()
@@ -230,13 +138,15 @@ export default {
         },
 
         drawRotation() {
-            let _midX = this.midX
-            let _midY = this.midY
+            let _midX = (this.xDiff / 2) + this.points[0].x
+            let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
+
+            _ctx.lineWidth = 1
 
             //Draw OverCircle
             _ctx.beginPath()
-            _ctx.arc(_midX, _midY, this.hyp, 0, Math.PI *2)
+            _ctx.arc(_midX, _midY, (this.hyp / 2), 0, Math.PI *2)
             _ctx.stroke()
             _ctx.closePath()
 
@@ -250,22 +160,24 @@ export default {
             }
         },
         drawAngles() {
-            let _midX = this.midX
-            let _midY = this.midY
+            let _midX = (this.xDiff / 2) + this.points[0].x
+            let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
 
-            _ctx.font = '50px'
-            _ctx.fillText(this.yDiff, this.points[0].x, _midY + 20)
-            _ctx.fillText(this.xDiff, _midX - 30, this.points[1].y)
+            _ctx.font = '20px sans-serif'
+            _ctx.fillText("y: " + this.yDiff, this.points[0].x, _midY + 20)
+            _ctx.fillText("x: " + this.xDiff, _midX - 30, this.points[1].y)
             _ctx.fillText(this.hyp, _midX, _midY - 25)
             _ctx.fillText(this.soh, this.points[0].x, this.points[0].y)
 
+            _ctx.strokeStyle = "#000"
+            _ctx.lineWidth = 3
             // Draw the control triangle
             _ctx.beginPath()
             _ctx.moveTo(this.points[0].x, this.points[0].y)
             _ctx.lineTo(this.points[1].x, this.points[1].y)
             _ctx.lineTo(this.points[0].x, this.points[1].y)
-            _ctx.lineTo(this.points[1].x, this.points[1].y)
+            _ctx.lineTo(this.points[0].x, this.points[0].y)
             _ctx.stroke()
             _ctx.closePath()
 
