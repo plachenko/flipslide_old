@@ -129,14 +129,13 @@ export default {
 
             this.points.forEach((point, ind) => {
                 _ctx.strokeStyle = colors[ind]
-                _ctx.fillText(ind, point.x, point.y - 55)
+                _ctx.fillText('(x: '+point.x+', y: '+point.y+')', point.x - 55, point.y - 55)
                 _ctx.beginPath()
                 _ctx.arc(point.x, point.y, 50, 0, Math.PI * 2)
                 _ctx.stroke()
                 _ctx.closePath()
             })
         },
-
         drawRotation() {
             let _midX = (this.xDiff / 2) + this.points[0].x
             let _midY = (this.yDiff / 2) + this.points[0].y
@@ -164,14 +163,71 @@ export default {
             let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
 
-            _ctx.font = '20px sans-serif'
-            _ctx.fillText("y: " + this.yDiff, this.points[0].x, _midY + 20)
-            _ctx.fillText("x: " + this.xDiff, _midX - 30, this.points[1].y)
-            _ctx.fillText(this.hyp, _midX, _midY - 25)
-            _ctx.fillText(this.soh, this.points[0].x, this.points[0].y)
+            _ctx.font = '15px sans-serif'
+            _ctx.fillText("Y: " + this.yDiff, (this.points[0].x + 10), this.points[0].y)
+
+            for(var yTick = 0; yTick <= Math.abs(this.yDiff); yTick += 10){
+                let _x = this.points[0].x
+                let _y = 0
+                let _size = 10
+
+                if(yTick === 10){
+                    _size = 5
+                }
+
+                if(this.points[1].x < this.points[0].x){
+                    _size = 10 
+                } else {
+                    _size = -10 
+                }
+
+                if(this.points[1].y < this.points[0].y){
+                    _y = yTick + this.points[1].y
+                } else {
+                    _y = yTick + this.points[0].y
+                }
+
+                _ctx.beginPath()
+                _ctx.moveTo(_x, _y)
+                _ctx.lineTo(_x + _size, _y)
+                _ctx.stroke()
+                _ctx.closePath()
+            }
+
+            for(var xTick = 0; xTick <= Math.abs(this.xDiff); xTick += 10){
+                let _x = 0
+                let _y = this.points[1].y
+                let _size = 10
+
+                if(this.points[1].y < this.points[0].y){
+                    _size = -10 
+                } else {
+                    _size = 10 
+                }
+
+                if(this.points[1].x < this.points[0].x){
+                    _x = xTick + this.points[1].x
+                } else {
+                    _x = xTick + this.points[0].x
+                }
+
+                _ctx.beginPath()
+                _ctx.moveTo(_x, _y)
+                _ctx.lineTo(_x, _y + _size)
+                _ctx.stroke()
+                _ctx.closePath()
+            }
+
+            if(this.points[1].x < this.points[0].x){
+                _ctx.fillText("X: " + this.xDiff, (this.points[0].x + 20), this.points[1].y)
+            } else {
+                _ctx.fillText("X: " + this.xDiff, (this.points[0].x - 60), this.points[1].y)
+            }
+
+            _ctx.fillText(Math.round(this.hyp), _midX, _midY - 25)
+            _ctx.fillText(Math.round(this.soh), this.points[0].x, this.points[0].y)
 
             _ctx.strokeStyle = "#000"
-            _ctx.lineWidth = 3
             // Draw the control triangle
             _ctx.beginPath()
             _ctx.moveTo(this.points[0].x, this.points[0].y)
