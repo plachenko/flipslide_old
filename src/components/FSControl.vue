@@ -43,7 +43,7 @@ export default {
         },
         soh: function() {
             // Sin (Opposite / Hypotenuse)
-            return Math.asin(this.yDiff / this.hyp) * (180 / Math.PI)
+            return Math.asin(this.yDiff / this.hyp) * (90 / Math.PI * 2)
         }
     },
     watch: {
@@ -107,7 +107,7 @@ export default {
                 this.drawAngles()
                 this.drawPoints()
 
-                // this.$eh.$emit('rotater', this.soh) 
+                this.$eh.$emit('rotater', this.soh) 
                 // this.$eh.$emit('scaler', this.scaler) 
             } else {
                 this.drawMouse()
@@ -158,6 +158,62 @@ export default {
                 _ctx.closePath()
             }
         },
+        drawTicks(type) {
+            let _x = 0
+            let _y = 0
+            let _xsize = 0
+            let _ysize = 0
+            let _tickInt = 10
+            let _max = 0
+            let _ctx = this.context
+
+            if(type === "x") {
+                _y = this.points[1].y
+                _max = Math.abs(this.xDiff)
+                _ysize = 10
+            } else if(type === "y") {
+                _x = this.points[0].x
+                _max = Math.abs(this.yDiff)
+                _xsize = 10
+            }
+
+            for(var tick = 0; tick <= _max; tick += _tickInt){
+
+                if(type === "x"){
+                    if(this.points[0].y < this.points[1].y){
+                        _ysize = 10 
+                    } else {
+                        _ysize = -10 
+                    }
+
+                    if(this.points[1].x < this.points[0].x){
+                        _x = tick + this.points[1].x
+                    } else {
+                        _x = tick + this.points[0].x
+                    }
+                }
+
+                if(type === "y"){
+                    if(this.points[1].x < this.points[0].x){
+                        _xsize = 10 
+                    } else {
+                        _xsize = -10 
+                    }
+
+                    if(this.points[1].y < this.points[0].y){
+                        _y = tick + this.points[1].y
+                    } else {
+                        _y = tick + this.points[0].y
+                    }
+                }
+
+                _ctx.beginPath()
+                _ctx.moveTo(_x, _y)
+                _ctx.lineTo(_x + _xsize, _y + _ysize)
+                _ctx.stroke()
+                _ctx.closePath()
+            }
+        },
         drawAngles() {
             let _midX = (this.xDiff / 2) + this.points[0].x
             let _midY = (this.yDiff / 2) + this.points[0].y
@@ -166,57 +222,8 @@ export default {
             _ctx.font = '15px sans-serif'
             _ctx.fillText("Y: " + this.yDiff, (this.points[0].x + 10), this.points[0].y)
 
-            for(var yTick = 0; yTick <= Math.abs(this.yDiff); yTick += 10){
-                let _x = this.points[0].x
-                let _y = 0
-                let _size = 10
-
-                if(yTick === 10){
-                    _size = 5
-                }
-
-                if(this.points[1].x < this.points[0].x){
-                    _size = 10 
-                } else {
-                    _size = -10 
-                }
-
-                if(this.points[1].y < this.points[0].y){
-                    _y = yTick + this.points[1].y
-                } else {
-                    _y = yTick + this.points[0].y
-                }
-
-                _ctx.beginPath()
-                _ctx.moveTo(_x, _y)
-                _ctx.lineTo(_x + _size, _y)
-                _ctx.stroke()
-                _ctx.closePath()
-            }
-
-            for(var xTick = 0; xTick <= Math.abs(this.xDiff); xTick += 10){
-                let _x = 0
-                let _y = this.points[1].y
-                let _size = 10
-
-                if(this.points[1].y < this.points[0].y){
-                    _size = -10 
-                } else {
-                    _size = 10 
-                }
-
-                if(this.points[1].x < this.points[0].x){
-                    _x = xTick + this.points[1].x
-                } else {
-                    _x = xTick + this.points[0].x
-                }
-
-                _ctx.beginPath()
-                _ctx.moveTo(_x, _y)
-                _ctx.lineTo(_x, _y + _size)
-                _ctx.stroke()
-                _ctx.closePath()
-            }
+            this.drawTicks('x')
+            this.drawTicks('y')
 
             if(this.points[1].x < this.points[0].x){
                 _ctx.fillText("X: " + this.xDiff, (this.points[0].x + 20), this.points[1].y)
@@ -225,7 +232,7 @@ export default {
             }
 
             _ctx.fillText(Math.round(this.hyp), _midX, _midY - 25)
-            _ctx.fillText(Math.round(this.soh), this.points[0].x, this.points[0].y)
+            _ctx.fillText(Math.round(this.soh), this.points[0].x + 40, this.points[0].y + 40)
 
             _ctx.strokeStyle = "#000"
             // Draw the control triangle
