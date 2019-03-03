@@ -1,6 +1,7 @@
 <template>
     <div>
         <div @pointerdown="dnEvt" @pointermove="mvEvt" @pointerup="upEvt" id="FSPointer" ref="capture" />
+        <span style="position: absolute; right: 0px; z-index: 9999; top: 0px;">{{type}}</span>
         <canvas id="canvas" ref="canvas" />
     </div>
 </template>
@@ -14,14 +15,14 @@ export default {
         return{
             canvas: null,
             context: null,
+            mousePos: null,
             points: [],
-            savePoints: [],
-            pointers: [],
             mdown: [
                 false,
                 false,
                 false
-            ]
+            ],
+            type: null
         }
     },
     mounted(){
@@ -33,7 +34,40 @@ export default {
         window.addEventListener('contextmenu', this.contextEvt)
         window.addEventListener('resize', this.resizeEvt)
     },
+    computed: {
+        yDiff: function() {
+            // Rise
+            return this.points[1].y - this.points[0].y
+        },
+        midY: function() {
+            // Mid Rise
+            return (this.yDiff / 2) + this.points[0].x
+        },
+        xDiff: function() {
+            // Run
+            return this.points[1].x - this.points[0].x
+        },
+        midX: function() {
+            // Mid Run
+            return (this.xDiff / 2) + this.points[0].y
+        },
+        hyp: function() {
+            //Hypotenuse
+            let _ab = Math.pow(this.xDiff, 2) + Math.pow(this.yDiff,2)
+            return Math.sqrt(_ab)
+        },
+        soh: function() {
+            // Sin (Opposite / Hypotenuse)
+            return Math.asin(this.yDiff / this.hyp) * (180 / Math.PI)
+        }
+    },
     watch: {
+        mousePos: {
+            handler: function(){
+                this.draw()
+            },
+            deep: true
+        },
         points: {
             handler: function(){
                 this.draw()
@@ -43,6 +77,7 @@ export default {
     },
     methods: {
         resizeEvt() {
+            // TODO: move to global evenhub
             this.sizeCanvas()
         },
         contextEvt(e) {
@@ -51,29 +86,26 @@ export default {
 
         dnEvt(e) {
             /*
-            Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
-            Vue.set(this.savePoints, 0, {x: e.clientX, y: e.clientY})
-            Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
-            Vue.set(this.savePoints, 1, {x: e.clientX, y: e.clientY})
-
-            switch(e.which){
-                case 1:
-                    this.mdown[0] = true
-                    break
-                case 2:
-                    this.mdown[2] = true
-                    break
-                case 3:
-                    this.mdown[1] = true
-                    break
+           let _pointIdx = this.points.length
+           let _pointObj = {
+               id: e.pointerId,
+               type: e.which,
+               x: e.clientX,
+               y: e.clientY
             }
+
+            Vue.set(this.points, _pointIdx, _pointObj)
+            console.log(this.points)
             */
-            /*
+
+            // Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
+            // Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
+
+/*
             switch(e.which){
                 case 1:
                     this.mdown[0] = true
                     Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
-                    Vue.set(this.savePoints, 0, {x: e.clientX, y: e.clientY})
                     break
                 case 2:
                     this.mdown[2] = true
@@ -86,17 +118,26 @@ export default {
                     break
             }
             */
+           this.type = e.which
         },
         mvEvt(e) {
-            Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
+            console.log(this.mouseArray)
             /*
+            if(!this.points.length){
+                this.mousePos = {x: e.clientX, y: e.clientY}
+            }
+
             if(this.mdown[0] === true){
                 Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
             }
             if(this.mdown[1] === true){
                 Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
             }
+            */
 
+            // Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
+
+            /*
             if(this.mdown[2] === true){
                 let xOffset = e.clientX - this.points[2].x
                 let yOffset = e.clientY - this.points[2].y
@@ -120,6 +161,11 @@ export default {
         },
         upEvt(e) {
             /*
+            console.log(this.points)
+            this.points.some((i,idx) => {
+                this.points.splice(idx,1)
+            })
+            */
             switch(e.which){
                 case 1:
                     this.mdown[0] = false
@@ -133,8 +179,6 @@ export default {
             }
 
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height)
-            this.$eh.$emit('set')
-            */
         },
 
         sizeCanvas() {
@@ -148,65 +192,56 @@ export default {
         },
 
         draw() {
-            let _can = this.canvas
-            let _ctx = this.context
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-
-            _ctx.clearRect(0, 0, _can.width, _can.height)
-            let colors = ['#FF0000', '#0000FF']
-
-            let xDiff = 0 
-            let yDiff = 0 
-            let cDiff = 0
-
-            let x2Diff = 0 
-            let y2Diff = 0 
-            let c2Diff = 0
-
-            let scaler = 0
-
-            let soh = 0
-            
-
-            if(this.points.length > 1 && this.points[0] !== undefined){
-
-                xDiff = this.points[1].x - this.points[0].x
-                yDiff = this.points[1].y - this.points[0].y
-                cDiff = Math.pow(xDiff, 2) + Math.pow(yDiff,2)
-
-                soh = Math.asin(yDiff/Math.sqrt(cDiff)) * (180 / (Math.PI))
-
-                x2Diff = this.savePoints[1].x - this.savePoints[0].x
-                y2Diff = this.savePoints[1].y - this.savePoints[0].y
-                c2Diff = Math.pow(x2Diff, 2) + Math.pow(y2Diff,2)
-
-                scaler = Math.sqrt(cDiff) / Math.sqrt(c2Diff)  
-
-                this.$eh.$emit('rotater', soh) 
-                this.$eh.$emit('scaler', scaler) 
-
-                let _midX = (xDiff / 2) + this.points[0].x 
-                let _midY = (yDiff / 2) + this.points[0].y 
-
-                _ctx.strokeStyle = "#000"
-
-
+            if(this.points.length >= 1){
                 this.drawRotation()
                 this.drawAngles()
-            }
+                this.drawPoints()
 
-            this.drawPoints()
+                // this.$eh.$emit('rotater', this.soh) 
+                // this.$eh.$emit('scaler', this.scaler) 
+            } else {
+                this.drawMouse()
+            }
         },
-        drawRotation(){
+
+        drawMouse() {
+            let _ctx = this.context
+
+            _ctx.beginPath()
+            _ctx.arc(this.mousePos.x, this.mousePos.y, 50, 0, Math.PI * 2)
+            _ctx.stroke()
+            _ctx.closePath()
+        },
+        drawPoints() {
+            let _ctx = this.context
+            let colors = ["#FF0000", "#0000FF"]
+
+            this.points.forEach((point, ind) => {
+                console.log(point)
+                _ctx.strokeStyle = colors[ind]
+                _ctx.fillText(ind, point.x, point.y - 55)
+                _ctx.beginPath()
+                _ctx.arc(point.x, point.y, 50, 0, Math.PI * 2)
+                _ctx.stroke()
+                _ctx.closePath()
+            })
+        },
+
+        drawRotation() {
+            let _midX = this.midX
+            let _midY = this.midY
+            let _ctx = this.context
+
             //Draw OverCircle
             _ctx.beginPath()
-            _ctx.arc(_midX, _midY, Math.sqrt(cDiff)/2, 0, Math.PI *2)
+            _ctx.arc(_midX, _midY, this.hyp, 0, Math.PI *2)
             _ctx.stroke()
             _ctx.closePath()
 
-            // Draw Ticks.
+            // Draw Ticks
             for(var i = 0; i <= 10; i ++) {
-                let _x1 = 
                 _ctx.beginPath()
                 _ctx.moveTo(_midX, _midY)
                 _ctx.lineTo(_midX, _midY - 20)
@@ -215,13 +250,17 @@ export default {
             }
         },
         drawAngles() {
+            let _midX = this.midX
+            let _midY = this.midY
+            let _ctx = this.context
+
+            _ctx.font = '50px'
+            _ctx.fillText(this.yDiff, this.points[0].x, _midY + 20)
+            _ctx.fillText(this.xDiff, _midX - 30, this.points[1].y)
+            _ctx.fillText(this.hyp, _midX, _midY - 25)
+            _ctx.fillText(this.soh, this.points[0].x, this.points[0].y)
+
             // Draw the control triangle
-            _ctx.fillText(yDiff+"", this.points[0].x, _midY + 20)
-            _ctx.fillText(xDiff+"", _midX - 30, this.points[1].y)
-            _ctx.fillText(Math.round(Math.sqrt(cDiff))+"", _midX, _midY - 25)
-
-            _ctx.fillText(soh+"", this.points[0].x, this.points[0].y)
-
             _ctx.beginPath()
             _ctx.moveTo(this.points[0].x, this.points[0].y)
             _ctx.lineTo(this.points[1].x, this.points[1].y)
@@ -235,16 +274,6 @@ export default {
             _ctx.lineTo(_midX, _midY - 20)
             _ctx.stroke()
             _ctx.closePath()
-        },
-        drawPoints() {
-            this.points.forEach((point, ind) => {
-                _ctx.strokeStyle = colors[ind]
-                _ctx.fillText(ind+"", point.x, point.y - 55)
-                _ctx.beginPath()
-                _ctx.arc(point.x, point.y, 50, 0, Math.PI * 2)
-                _ctx.stroke()
-                _ctx.closePath()
-            })
         }
     }
 }
