@@ -43,7 +43,7 @@ export default {
         },
         soh: function() {
             // Sin (Opposite / Hypotenuse)
-            return Math.asin(this.yDiff / this.hyp) * (90 / Math.PI * 2)
+            return Math.asin(this.yDiff / this.hyp)
         }
     },
     watch: {
@@ -106,8 +106,9 @@ export default {
                 this.drawRotation()
                 this.drawAngles()
                 this.drawPoints()
+                this.drawText()
 
-                this.$eh.$emit('rotater', this.soh) 
+                // this.$eh.$emit('rotater', this.soh) 
                 // this.$eh.$emit('scaler', this.scaler) 
             } else {
                 this.drawMouse()
@@ -119,9 +120,47 @@ export default {
 
             _ctx.strokeStyle = "#000"
             _ctx.beginPath()
-            _ctx.arc(this.mousePos.x, this.mousePos.y, 50, 0, Math.PI * 2)
+            _ctx.arc(this.mousePos.x, this.mousePos.y, 20, 0, Math.PI * 2)
             _ctx.stroke()
             _ctx.closePath()
+        },
+        drawText(){
+            let _ctx = this.context
+            let _midX = (this.xDiff / 2) + this.points[0].x
+            let _midY = (this.yDiff / 2) + this.points[0].y
+            let _yoffset = 0;
+
+            _ctx.font = '12px sans-serif'
+            _ctx.fillText("Y: " + this.yDiff, (this.points[0].x + 10), this.points[0].y)
+
+            if(this.points[1].y < this.points[0].y){
+                _yoffset = 10
+            } else {
+                _yoffset = -10
+            }
+
+            if(this.points[1].x < this.points[0].x){
+                _ctx.fillText("X: " + this.xDiff, this.points[0].x + 10, this.points[1].y - _yoffset)
+
+                _ctx.beginPath()
+                _ctx.moveTo(this.points[0].x, this.points[1].y)
+                _ctx.lineTo(this.points[0].x, this.points[1].y-_yoffset)
+                _ctx.lineTo(this.points[0].x + 5, this.points[1].y-_yoffset)
+                _ctx.stroke()
+                _ctx.closePath()
+            } else {
+                _ctx.fillText("X: " + this.xDiff, this.points[0].x - 45, this.points[1].y - _yoffset)
+
+                _ctx.beginPath()
+                _ctx.moveTo(this.points[0].x, this.points[1].y)
+                _ctx.lineTo(this.points[0].x, this.points[1].y-_yoffset)
+                _ctx.lineTo(this.points[0].x - 5, this.points[1].y-_yoffset)
+                _ctx.stroke()
+                _ctx.closePath()
+            }
+
+            _ctx.fillText(Math.round(this.hyp), _midX, _midY - 25)
+            _ctx.fillText(Math.round(this.soh * (180 / Math.PI)), this.points[1].x + 40, this.points[1].y + 20)
         },
         drawPoints() {
             let _ctx = this.context
@@ -129,9 +168,9 @@ export default {
 
             this.points.forEach((point, ind) => {
                 _ctx.strokeStyle = colors[ind]
-                _ctx.fillText('(x: '+point.x+', y: '+point.y+')', point.x - 55, point.y - 55)
+                _ctx.fillText('(x: '+point.x+', y: '+point.y+')', point.x, point.y + 40)
                 _ctx.beginPath()
-                _ctx.arc(point.x, point.y, 50, 0, Math.PI * 2)
+                _ctx.arc(point.x, point.y, 20, 0, Math.PI * 2)
                 _ctx.stroke()
                 _ctx.closePath()
             })
@@ -140,6 +179,15 @@ export default {
             let _midX = (this.xDiff / 2) + this.points[0].x
             let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
+
+            _ctx.lineWidth = 3
+            _ctx.strokeStyle = "#000"
+
+            //Draw InnerCircle
+            _ctx.beginPath()
+            _ctx.arc(this.points[1].x, this.points[1].y, 25, 0, -1*this.soh * (Math.PI))
+            _ctx.stroke()
+            _ctx.closePath()
 
             _ctx.lineWidth = 1
 
@@ -161,6 +209,7 @@ export default {
         drawTicks(type) {
             let _x = 0
             let _y = 0
+            let _size = 3
             let _xsize = 0
             let _ysize = 0
             let _tickInt = 10
@@ -170,20 +219,20 @@ export default {
             if(type === "x") {
                 _y = this.points[1].y
                 _max = Math.abs(this.xDiff)
-                _ysize = 10
+                _ysize = _size
             } else if(type === "y") {
                 _x = this.points[0].x
                 _max = Math.abs(this.yDiff)
-                _xsize = 10
+                _xsize = _size
             }
 
             for(var tick = 0; tick <= _max; tick += _tickInt){
 
                 if(type === "x"){
                     if(this.points[0].y < this.points[1].y){
-                        _ysize = 10 
+                        _ysize = _size
                     } else {
-                        _ysize = -10 
+                        _ysize = -1*_size
                     }
 
                     if(this.points[1].x < this.points[0].x){
@@ -195,9 +244,9 @@ export default {
 
                 if(type === "y"){
                     if(this.points[1].x < this.points[0].x){
-                        _xsize = 10 
+                        _xsize = _size
                     } else {
-                        _xsize = -10 
+                        _xsize = -1*_size
                     }
 
                     if(this.points[1].y < this.points[0].y){
@@ -219,20 +268,8 @@ export default {
             let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
 
-            _ctx.font = '15px sans-serif'
-            _ctx.fillText("Y: " + this.yDiff, (this.points[0].x + 10), this.points[0].y)
-
             this.drawTicks('x')
             this.drawTicks('y')
-
-            if(this.points[1].x < this.points[0].x){
-                _ctx.fillText("X: " + this.xDiff, (this.points[0].x + 20), this.points[1].y)
-            } else {
-                _ctx.fillText("X: " + this.xDiff, (this.points[0].x - 60), this.points[1].y)
-            }
-
-            _ctx.fillText(Math.round(this.hyp), _midX, _midY - 25)
-            _ctx.fillText(Math.round(this.soh), this.points[0].x + 40, this.points[0].y + 40)
 
             _ctx.strokeStyle = "#000"
             // Draw the control triangle
