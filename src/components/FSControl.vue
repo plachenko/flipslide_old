@@ -16,11 +16,13 @@ export default {
             context: null,
             mousePos: null,
             points: [],
+            md: false
         }
     },
     mounted(){
         this.canvas = this.$refs.canvas
         this.context = this.canvas.getContext('2d')
+        this.context.imageSmoothingEnabled = true
 
         this.sizeCanvas()
 
@@ -71,20 +73,30 @@ export default {
 
         dnEvt(e) {
             // Capture the pointer
-            Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
-            Vue.set(this.points, 1, {x: e.clientX, y: e.clientY})
+            let _x = Math.round(e.clientX)
+            let _y = Math.round(e.clientY)
+
+            this.md = true
+
+            Vue.set(this.points, 0, {x: _x, y: _y})
+            Vue.set(this.points, 1, {x: _x, y: _y})
         },
         mvEvt(e) {
             // If there is no pointer down, set mouse position
-            if(this.points[0] && this.points[1]){
-                Vue.set(this.points, 0, {x: e.clientX, y: e.clientY})
+            let _x = Math.round(e.clientX)
+            let _y = Math.round(e.clientY)
+
+            if(this.md){
+                Vue.set(this.points, 0, {x: _x, y: _y})
             } else {
-                this.mousePos = {x: e.clientX, y: e.clientY}
+                this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
+                this.mousePos = {x: _x, y: _y}
             }
         },
         upEvt(e) {
             // Clear the canvas.
             this.points = []
+            this.md = false
 
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height)
         },
@@ -179,13 +191,24 @@ export default {
             let _midX = (this.xDiff / 2) + this.points[0].x
             let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
+            let _sAngle = 0
+            let _x = this.points[1].x
+            let _y = this.points[1].y
+
+            if(_x < this.points[0].x){
+                // console.log('x is less...')
+                _sAngle = -1 * this.soh 
+            } else {
+                // console.log('x is more...')
+                _sAngle = -1 * (-1 * this.soh + 1)
+            }
 
             _ctx.lineWidth = 3
             _ctx.strokeStyle = "#000"
 
             //Draw InnerCircle
             _ctx.beginPath()
-            _ctx.arc(this.points[1].x, this.points[1].y, 25, 0, -1*this.soh * (Math.PI))
+            _ctx.arc(_x, _y, 25, _sAngle, 0)
             _ctx.stroke()
             _ctx.closePath()
 
@@ -193,7 +216,7 @@ export default {
 
             //Draw OverCircle
             _ctx.beginPath()
-            _ctx.arc(_midX, _midY, (this.hyp / 2), 0, Math.PI *2)
+            _ctx.arc(_midX, _midY, (this.hyp / 2), 0, (Math.PI * 2))
             _ctx.stroke()
             _ctx.closePath()
 
@@ -298,13 +321,14 @@ export default {
         height: 100%;
         top: 0px;
         left: 0px;
-        z-index: 9999;
+        z-index: 9997;
     }
     #canvas{
-        z-index: 9998;
+        z-index: 9996;
         position: absolute;
         top: 0px;
         left: 0px;
+        image-rendering: pixelated;
     }
 </style>
 

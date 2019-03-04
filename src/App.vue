@@ -1,16 +1,13 @@
 <template>
   <div id="app" onresize="resizer()">
-    <!--
     <div id="topContainer">
-      <div class="btn" style="">Layers</div>
+      <div class="btn" @click="visible.control = !visible.control">File</div>
+      <div class="btn" @click="visible.control = !visible.control">Control</div>
+      <div class="btn">Layers</div>
+      <div class="btn" @click="visible.control = !visible.control">Colors</div>
     </div>
-    -->
-    <FSControl />
-    <span style="position: absolute; top: 0px; left: 0px; z-index: 9999">
-      {{scale}}
-    </span>
+    <FSControl v-show="visible.control" />
     <div ref="can" :style="{transform: 'rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
-    <!-- <div ref="can" :style="{transform: 'matrix('+scale+','+rotation+','+(-1*rotation)+','+scale+',0,0)'}" id="canvas-container"> -->
       <!--
       <div class="handle tb" v-for="(i, idx) in 2" :key="idx" :style="{ }"></div>
       <div class="handle rl" style="top: -30px;"></div>
@@ -48,11 +45,6 @@ export default {
 
     })
 
-    setInterval(() => {
-      // this.scale -= Math.sin()
-      // this.rotation += 1
-    }, 1000)
-
     this.$eh.$on('scaler', (e)=>{
       this.scale = e
       /*
@@ -76,6 +68,9 @@ export default {
       canvas_container: null,
       width: 0,
       scale: 1,
+      visible: {
+        control: false
+      },
       temp_scale: 0,
       rotation: 0
     }
@@ -123,18 +118,39 @@ body{
 
 #topContainer {
   margin: 0px auto; 
-  width: 600px; 
-  height: 50px;
+  width: 500px; 
+  height: 40px;
 }
 #topContainer .btn{
-  background-color: #F00; 
-  height: 100%; 
-  text-align: center; 
-  padding:15px; 
   box-sizing: border-box; 
+  user-select: none;
+  cursor: pointer;
+  position: relative;
   float: left; 
+  background-color:#FFF;
+
+  z-index: 9999;
   min-width:100px; 
-  border-radius: 0px 0px 0px 20px
+  height: 100%; 
+  padding:10px; 
+
+  font-weight: bold;
+  text-align: center; 
+
+  border: 1px solid;
+  border-left: 1px dashed;
+  border-right: none;
+  border-top: 0px;
+}
+#topContainer .btn:first-child{
+  border-radius: 0px 0px 0px 20px;
+  border-right: 0px;
+  border-left: 1px solid;
+}
+
+#topContainer .btn:last-child{
+  border-radius: 0px 0px 20px 0px;
+  border-right: 1px solid;
 }
 
 #canvas-container {
