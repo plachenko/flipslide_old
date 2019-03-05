@@ -165,6 +165,7 @@ export default {
       _can.style.top = _h + "px"
     },
     center(){
+      this.setRotate = 0;
       this.rotation = 0;
       this.scale = 1;
       this.setScale = 1
