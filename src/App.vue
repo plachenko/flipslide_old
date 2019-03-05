@@ -92,7 +92,7 @@ export default {
       canvas_container: null,
       width: 0,
       scale: 1,
-      margin: 0,
+      margin: 20,
       translate: {
         x1: 0,
         y1: 0,
@@ -128,7 +128,6 @@ export default {
     sizeRight(){
       let margin = this.margin
       let _left = this.$refs.left_menu
-      let _w = window.innerWidth - margin
       let _h = window.innerHeight - margin
       
       _left.style.top = (_h / 2) - (_left.clientHeight / 2) + "px"
@@ -136,7 +135,6 @@ export default {
     sizeLeft(){
       let margin = this.margin
       let _right = this.$refs.right_menu
-      let _w = window.innerWidth - margin
       let _h = window.innerHeight - margin
 
       _right.style.top = (_h / 2) - (_right.clientHeight / 2) + "px"

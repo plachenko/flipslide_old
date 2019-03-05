@@ -77,8 +77,8 @@ export default {
             e.preventDefault();
         },
 
-        scrollEvt(e) {
-            console.log('scrolling',e)
+        scrollEvt() {
+            //Add scrolling event functionality
         },
         dnEvt(e) {
             // Capture the pointer
@@ -124,7 +124,7 @@ export default {
                 this.mousePos = {x: _x, y: _y}
             }
         },
-        upEvt(e) {
+        upEvt() {
             // Clear the canvas.
             this.points = []
             this.md = false
@@ -171,8 +171,6 @@ export default {
         },
         drawText(){
             let _ctx = this.context
-            let _midX = (this.xDiff / 2) + this.points[0].x
-            let _midY = (this.yDiff / 2) + this.points[0].y
             let _yoffset = 0
 
             _ctx.font = '12px sans-serif'
@@ -220,14 +218,10 @@ export default {
             })
         },
         drawRotation() {
-            let _midX = (this.xDiff / 2) + this.points[0].x
-            let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
             let _x = this.points[1].x
             let _y = this.points[1].y
             let _offset = this.rotOffset
-            let _i = 0
-            let _soh = 0
 
             //Draw InnerCircle
             if(this.hyp <= _offset){
@@ -244,7 +238,6 @@ export default {
 
                 if(!this.firstAngle){
                     if(this.xDiff >= 0){
-                        console.log(this.xDiff < 0)
                         this.firstAngle = -1 * this.soh
                     } else {
                         this.firstAngle = Math.PI + this.soh
@@ -354,8 +347,6 @@ export default {
             }
         },
         drawAngles() {
-            let _midX = (this.xDiff / 2) + this.points[0].x
-            let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
 
             this.drawTicks('x')
