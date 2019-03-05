@@ -82,7 +82,7 @@ export default {
     sizeCanvas(){
       let _can = this.canvas_container
 
-      let margin = 30
+      let margin = 90
       let _w = window.innerWidth - margin
       let _h = window.innerHeight - margin
 
