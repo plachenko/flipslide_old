@@ -19,7 +19,7 @@ export default {
             md: false,
             middle: false,
             scaler: 0,
-            rotOffset: 25,
+            rotOffset: 45,
             firstAngle: 0,
             secondAngle: 0,
             firstPoint: {x: 0, y: 0}
@@ -42,7 +42,7 @@ export default {
         },
         xDiff: function() {
             // Run
-            return this.points[1].x - this.points[0].x
+            return this.points[0].x - this.points[1].x
         },
         hyp: function() {
             //Hypotenuse
@@ -77,6 +77,9 @@ export default {
             e.preventDefault();
         },
 
+        scrollEvt(e) {
+            console.log('scrolling',e)
+        },
         dnEvt(e) {
             // Capture the pointer
             let _x = Math.round(e.clientX)
@@ -144,7 +147,7 @@ export default {
         draw() {
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-            if(this.points.length >= 1){
+            if(this.md){
                 this.drawRotation()
                 this.drawAngles()
                 this.drawPoints()
@@ -152,7 +155,6 @@ export default {
                     this.drawText()
                 }
 
-                // this.$eh.$emit('rotater', this.secondAngle * (90/ Math.PI)) 
             } else {
                 this.drawMouse()
             }
@@ -171,7 +173,7 @@ export default {
             let _ctx = this.context
             let _midX = (this.xDiff / 2) + this.points[0].x
             let _midY = (this.yDiff / 2) + this.points[0].y
-            let _yoffset = 0;
+            let _yoffset = 0
 
             _ctx.font = '12px sans-serif'
             _ctx.fillText("Y: " + this.yDiff, (this.points[0].x + 10), this.points[0].y)
@@ -203,7 +205,6 @@ export default {
             }
 
             // _ctx.fillText(Math.round(this.hyp), _midX, _midY - 25)
-            _ctx.fillText(Math.round(this.soh * (180 / Math.PI)), this.points[1].x + 40, this.points[1].y + 20)
         },
         drawPoints() {
             let _ctx = this.context
@@ -240,33 +241,40 @@ export default {
                 this.firstAngle = 0
                 this.secondAngle = 0
             } else {
+
                 if(!this.firstAngle){
-                    this.firstAngle = -1 * this.soh
-                    /*
-                    if(this.points[0].x > this.points[1].x){
+                    if(this.xDiff >= 0){
+                        console.log(this.xDiff < 0)
+                        this.firstAngle = -1 * this.soh
                     } else {
-                        this.firstAngle = -1 * (this.soh + 180) 
+                        this.firstAngle = Math.PI + this.soh
                     }
-                    */
                 }
-                // _soh = -1 * this.soh
 
-                // this.secondAngle = -1 * this.soh
-                this.secondAngle = Math.cos(this.points[0].y) / Math.sin(this.points[0].x)
-
-                // if(Math.abs(this.secondAngle) <= (Math.PI*2) - this.firstAngle){
-                //     this.secondAngle = ((this.xDiff/10) / Math.PI*2)
-                // }
+                if(this.xDiff >= 0 && this.firstAngle){
+                    this.secondAngle = -1 * this.soh
+                } else {
+                    this.secondAngle = Math.PI + this.soh
+                }
 
                 _ctx.lineWidth = 3
                 _ctx.strokeStyle = "#000"
 
                 //Draw InnerCircle
                 _ctx.beginPath()
-                _ctx.arc(_x, _y, _offset, this.firstAngle, this.secondAngle/ 100)
+                if(this.firstAngle < this.secondAngle){
+                    _ctx.arc(_x, _y, _offset, this.firstAngle, this.secondAngle)
+                } else {
+                    _ctx.arc(_x, _y, _offset, this.secondAngle, this.firstAngle)
+                }
                 _ctx.stroke()
                 _ctx.closePath()
             }
+
+            let roter = Math.round((this.secondAngle - this.firstAngle) * (180 / Math.PI))
+
+            this.$eh.$emit('rotater', roter) 
+            _ctx.fillText(roter + "DEG", this.points[1].x + 40, this.points[1].y + 20)
 
             _ctx.lineWidth = 1
             /*

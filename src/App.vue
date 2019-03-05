@@ -58,9 +58,10 @@ export default {
     window.addEventListener('resize', this.resizeEvt)
 
     this.$eh.$on('set', () => {
-      this.rot = 0
       this.translate.x2 = -1 * this.translate.x1
       this.translate.y2 = -1 * this.translate.y1
+
+      this.setRotate = this.rotation
 
       this.setScale = this.scale
     })
@@ -71,16 +72,14 @@ export default {
     })
 
     this.$eh.$on('rotater', (e)=>{
-      if((e/360) <= Math.PI*2){
-        this.rotation += (e / 360)
-      }
+      this.rotation = (this.setRotate + e)
     })
 
     this.$eh.$on('scaler', (e)=>{
       if(e > 1){
         this.scale = e + (this.setScale - 1)
       } else if(e === 0) {
-        this.scale = 1
+        this.scale = this.setScale
       } else {
         if(this.scale > .1){
           this.scale = this.setScale - (1 - e)
@@ -107,6 +106,7 @@ export default {
         brush: false
       },
       temp_scale: 0,
+      setRotate: 0,
       rotation: 0,
       enabled: true,
       layers: [
@@ -233,7 +233,7 @@ body{
   top: 0px;
   left: 0px;
   background-color: #FFF;
-  box-shadow: #444 2px 2px 3px
+  box-shadow: #444 0px 0px 4px
 }
 
 .menu{
@@ -244,8 +244,6 @@ body{
   z-index: 9999;
   padding: 10px;
   box-sizing: border-box;
-}
-.left {
   border-radius: 0px 10px 10px 0px;
   left: 0px;
   height: 200px;
