@@ -79,7 +79,7 @@ export default {
     this.$eh.$on('scaler', (e)=>{
       if(e > 1){
         this.scale = e + (this.setScale - 1)
-      } else if(e === 1) {
+      } else if(e === 0) {
         this.scale = 1
       } else {
         if(this.scale > .1){

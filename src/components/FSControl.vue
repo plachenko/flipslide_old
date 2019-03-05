@@ -19,9 +19,10 @@ export default {
             md: false,
             middle: false,
             scaler: 0,
-            rotOffset: 60,
+            rotOffset: 25,
             firstAngle: 0,
-            secondAngle: 0
+            secondAngle: 0,
+            firstPoint: {x: 0, y: 0}
         }
     },
     mounted(){
@@ -81,14 +82,15 @@ export default {
             let _x = Math.round(e.clientX)
             let _y = Math.round(e.clientY)
 
+            Vue.set(this.points, 0, {x: _x, y: _y})
+            Vue.set(this.points, 1, {x: _x, y: _y})
+
             if(e.which === 2){
                 this.middle = true
+                this.firstPoint = {x: e.clientX, y: e.clientY}
             } else {
                 this.md = true
             }
-
-            Vue.set(this.points, 0, {x: _x, y: _y})
-            Vue.set(this.points, 1, {x: _x, y: _y})
         },
         mvEvt(e) {
             // If there is no pointer down, set mouse position
@@ -98,20 +100,21 @@ export default {
             if(this.md) {
                 if(Math.abs(this.xDiff) < this.rotOffset && Math.abs(this.yDiff) < this.rotOffset){
                     if(this.points[0].x < this.points[1].x){
-                        this.scaler = 1 - (this.hyp / 50)
+                        this.scaler = 1 - (this.hyp / this.rotOffset) / 2
                     }else{
-                        this.scaler = 1 + (this.hyp / 50)
+                        this.scaler = 1 + (this.hyp / this.rotOffset) / 2
                     }
                 } else {
-                    this.scaler = 1
+                    this.scaler = 0
                 }
 
                 Vue.set(this.points, 0, {x: _x, y: _y})
                 this.$eh.$emit('scaler', this.scaler) 
             } else if(this.middle) {
-                _x = (Math.round(e.clientX - this.points[0].x))
-                _y = (Math.round(e.clientY - this.points[0].y))
+                _x = (Math.round(e.clientX - this.firstPoint.x))
+                _y = (Math.round(e.clientY - this.firstPoint.y))
 
+                Vue.set(this.points, 0, {x: this.firstPoint.x, y: this.firstPoint.y})
                 this.$eh.$emit('translate', {x: _x, y: _y}) 
             } else {
                 this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
@@ -145,7 +148,9 @@ export default {
                 this.drawRotation()
                 this.drawAngles()
                 this.drawPoints()
-                this.drawText()
+                if(this.hyp > this.rotOffset){
+                    this.drawText()
+                }
 
                 // this.$eh.$emit('rotater', this.secondAngle * (90/ Math.PI)) 
             } else {
@@ -206,7 +211,7 @@ export default {
 
             this.points.forEach((point, ind) => {
                 _ctx.strokeStyle = colors[ind]
-                _ctx.fillText('(x: '+point.x+', y: '+point.y+')', point.x, point.y + 40)
+                // _ctx.fillText('(x: '+point.x+', y: '+point.y+')', point.x, point.y + 40)
                 _ctx.beginPath()
                 _ctx.arc(point.x, point.y, 20, 0, Math.PI * 2)
                 _ctx.stroke()
@@ -221,9 +226,10 @@ export default {
             let _y = this.points[1].y
             let _offset = this.rotOffset
             let _i = 0
+            let _soh = 0
 
             //Draw InnerCircle
-            if(this.hyp < _offset){
+            if(this.hyp <= _offset){
                 _ctx.lineWidth = 1
                 _ctx.strokeStyle = "#000"
 
@@ -236,32 +242,31 @@ export default {
             } else {
                 if(!this.firstAngle){
                     this.firstAngle = -1 * this.soh
+                    /*
+                    if(this.points[0].x > this.points[1].x){
+                    } else {
+                        this.firstAngle = -1 * (this.soh + 180) 
+                    }
+                    */
                 }
+                // _soh = -1 * this.soh
 
-                if(Math.abs(this.secondAngle) <= (Math.PI*2) - this.firstAngle){
-                    this.secondAngle = ((this.xDiff/10) / Math.PI*2)
-                }
+                // this.secondAngle = -1 * this.soh
+                this.secondAngle = Math.cos(this.points[0].y) / Math.sin(this.points[0].x)
+
+                // if(Math.abs(this.secondAngle) <= (Math.PI*2) - this.firstAngle){
+                //     this.secondAngle = ((this.xDiff/10) / Math.PI*2)
+                // }
 
                 _ctx.lineWidth = 3
                 _ctx.strokeStyle = "#000"
 
                 //Draw InnerCircle
                 _ctx.beginPath()
-                _ctx.arc(_x, _y, _offset, this.firstAngle, this.secondAngle)
+                _ctx.arc(_x, _y, _offset, this.firstAngle, this.secondAngle/ 100)
                 _ctx.stroke()
                 _ctx.closePath()
             }
-
-/*
-            if(_x < this.points[0].x){
-                // console.log('x is less...')
-                _sAngle = -1 * this.soh 
-            } else {
-                // console.log('x is more...')
-                _sAngle = -1 * (-1 * this.soh + 1)
-            }
-            */
-
 
             _ctx.lineWidth = 1
             /*
@@ -321,9 +326,9 @@ export default {
 
                 if(type === "y"){
                     if(this.points[1].x < this.points[0].x){
-                        _xsize = (_size/100)
+                        _xsize = _size
                     } else {
-                        _xsize = 1 - (_size/100)
+                        _xsize = 1 - _size
                     }
 
                     if(this.points[1].y < this.points[0].y){
