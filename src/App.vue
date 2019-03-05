@@ -1,15 +1,15 @@
 <template>
   <div id="app" onresize="resizer()">
     <div id="topContainer">
-      <div class="btn" @click="visible.control = !visible.control">File</div>
+      <div class="btn">File</div>
       <div class="btn" @click="visible.control = !visible.control">Control</div>
-      <div class="btn">Layers</div>
-      <div class="btn" @click="visible.control = !visible.control">Colors</div>
+      <div class="btn" @click="visible.brush = !visible.brush">Brush</div>
+      <div class="btn" @click="visible.layers = !visible.layers">Layers</div>
     </div>
     <FSControl v-show="visible.control" />
 
-    <div class="menu left" ref="left_menu"></div>
-    <div class="menu right" ref="right_menu" id="layer_menu">
+    <div class="menu left" ref="left_menu" v-show="visible.brush"></div>
+    <div class="menu right" ref="right_menu" v-show="visible.layers" id="layer_menu">
       <div class="item_container">
         <draggable
           :list="layers"
@@ -24,7 +24,7 @@
         </draggable>
       </div>
     </div>
-    <div ref="can" :style="{transform: 'rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
+    <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
       <!--
       <div class="handle tb" v-for="(i, idx) in 2" :key="idx" :style="{ }"></div>
       <div class="handle rl" style="top: -30px;"></div>
@@ -35,6 +35,7 @@
       <div class="handle corner" style="right: -30px; bottom: -30px;"></div>
       -->
     </div>
+    <div id="control_center" @click="center" v-show="visible.control">center</div>
   </div>
 </template>
 
@@ -55,30 +56,36 @@ export default {
     this.centerCanvas()
 
     window.addEventListener('resize', this.resizeEvt)
+
     this.$eh.$on('set', () => {
+      this.rot = 0
+      this.translate.x2 = -1 * this.translate.x1
+      this.translate.y2 = -1 * this.translate.y1
+
+      this.setScale = this.scale
+    })
+
+    this.$eh.$on('translate', (e)=>{
+      this.translate.x1 = (e.x - this.translate.x2)
+      this.translate.y1 = (e.y - this.translate.y2)
     })
 
     this.$eh.$on('rotater', (e)=>{
-      this.rotation = e
-
+      if((e/360) <= Math.PI*2){
+        this.rotation += (e / 360)
+      }
     })
 
     this.$eh.$on('scaler', (e)=>{
-      this.scale = e
-      /*
       if(e > 1){
-        this.scale += e
-        console.log('zoom in!')
+        this.scale = e + (this.setScale - 1)
+      } else if(e === 1) {
+        this.scale = 1
       } else {
-        this.scale += 1 - e
-        console.log('zoomOut')
+        if(this.scale > .1){
+          this.scale = this.setScale - (1 - e)
+        }
       }
-      /*
-      if(e < 1){
-      } else {
-        this.scale -= e
-      }
-      */
     })
   },
   data() {
@@ -86,8 +93,18 @@ export default {
       canvas_container: null,
       width: 0,
       scale: 1,
+      margin: 0,
+      translate: {
+        x1: 0,
+        y1: 0,
+        x2: 0,
+        y2: 0
+      },
+      setScale: 1,
       visible: {
-        control: false
+        control: true,
+        layers: false,
+        brush: false
       },
       temp_scale: 0,
       rotation: 0,
@@ -109,7 +126,7 @@ export default {
       this.sizeRight()
     },
     sizeRight(){
-      let margin = 30
+      let margin = this.margin
       let _left = this.$refs.left_menu
       let _w = window.innerWidth - margin
       let _h = window.innerHeight - margin
@@ -117,7 +134,7 @@ export default {
       _left.style.top = (_h / 2) - (_left.clientHeight / 2) + "px"
     },
     sizeLeft(){
-      let margin = 30
+      let margin = this.margin
       let _right = this.$refs.right_menu
       let _w = window.innerWidth - margin
       let _h = window.innerHeight - margin
@@ -127,7 +144,7 @@ export default {
     sizeCanvas(){
       let _can = this.canvas_container
 
-      let margin = 90
+      let margin = this.margin
       let _w = window.innerWidth - margin
       let _h = window.innerHeight - margin
 
@@ -146,6 +163,17 @@ export default {
 
       _can.style.left = _w + "px"
       _can.style.top = _h + "px"
+    },
+    center(){
+      this.rotation = 0;
+      this.scale = 1;
+      this.setScale = 1
+      this.translate= {
+        x1: 0,
+        x2: 0,
+        y1: 0,
+        y2: 0
+      };
     }
   }
 }
@@ -269,6 +297,18 @@ height: 100%; width: 20px;
 .rl{
   width: 100%; 
   height: 20px;
+}
+
+#control_center {
+  border-radius: 10px;
+  background-color: #fff;
+  border: 1px solid;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9999;
+  cursor: pointer;
+  padding: 20px;
 }
 
 </style>

@@ -16,7 +16,12 @@ export default {
             context: null,
             mousePos: null,
             points: [],
-            md: false
+            md: false,
+            middle: false,
+            scaler: 0,
+            rotOffset: 60,
+            firstAngle: 0,
+            secondAngle: 0
         }
     },
     mounted(){
@@ -76,7 +81,11 @@ export default {
             let _x = Math.round(e.clientX)
             let _y = Math.round(e.clientY)
 
-            this.md = true
+            if(e.which === 2){
+                this.middle = true
+            } else {
+                this.md = true
+            }
 
             Vue.set(this.points, 0, {x: _x, y: _y})
             Vue.set(this.points, 1, {x: _x, y: _y})
@@ -86,8 +95,24 @@ export default {
             let _x = Math.round(e.clientX)
             let _y = Math.round(e.clientY)
 
-            if(this.md){
+            if(this.md) {
+                if(Math.abs(this.xDiff) < this.rotOffset && Math.abs(this.yDiff) < this.rotOffset){
+                    if(this.points[0].x < this.points[1].x){
+                        this.scaler = 1 - (this.hyp / 50)
+                    }else{
+                        this.scaler = 1 + (this.hyp / 50)
+                    }
+                } else {
+                    this.scaler = 1
+                }
+
                 Vue.set(this.points, 0, {x: _x, y: _y})
+                this.$eh.$emit('scaler', this.scaler) 
+            } else if(this.middle) {
+                _x = (Math.round(e.clientX - this.points[0].x))
+                _y = (Math.round(e.clientY - this.points[0].y))
+
+                this.$eh.$emit('translate', {x: _x, y: _y}) 
             } else {
                 this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
                 this.mousePos = {x: _x, y: _y}
@@ -97,6 +122,8 @@ export default {
             // Clear the canvas.
             this.points = []
             this.md = false
+            this.middle = false
+            this.$eh.$emit('set') 
 
             this.context.clearRect(0,0,this.canvas.width, this.canvas.height)
         },
@@ -120,8 +147,7 @@ export default {
                 this.drawPoints()
                 this.drawText()
 
-                // this.$eh.$emit('rotater', this.soh) 
-                // this.$eh.$emit('scaler', this.scaler) 
+                // this.$eh.$emit('rotater', this.secondAngle * (90/ Math.PI)) 
             } else {
                 this.drawMouse()
             }
@@ -171,7 +197,7 @@ export default {
                 _ctx.closePath()
             }
 
-            _ctx.fillText(Math.round(this.hyp), _midX, _midY - 25)
+            // _ctx.fillText(Math.round(this.hyp), _midX, _midY - 25)
             _ctx.fillText(Math.round(this.soh * (180 / Math.PI)), this.points[1].x + 40, this.points[1].y + 20)
         },
         drawPoints() {
@@ -191,10 +217,42 @@ export default {
             let _midX = (this.xDiff / 2) + this.points[0].x
             let _midY = (this.yDiff / 2) + this.points[0].y
             let _ctx = this.context
-            let _sAngle = 0
             let _x = this.points[1].x
             let _y = this.points[1].y
+            let _offset = this.rotOffset
+            let _i = 0
 
+            //Draw InnerCircle
+            if(this.hyp < _offset){
+                _ctx.lineWidth = 1
+                _ctx.strokeStyle = "#000"
+
+                _ctx.beginPath()
+                _ctx.arc(_x, _y, _offset, 0, Math.PI * 2)
+                _ctx.stroke()
+                _ctx.closePath()
+                this.firstAngle = 0
+                this.secondAngle = 0
+            } else {
+                if(!this.firstAngle){
+                    this.firstAngle = -1 * this.soh
+                }
+
+                if(Math.abs(this.secondAngle) <= (Math.PI*2) - this.firstAngle){
+                    this.secondAngle = ((this.xDiff/10) / Math.PI*2)
+                }
+
+                _ctx.lineWidth = 3
+                _ctx.strokeStyle = "#000"
+
+                //Draw InnerCircle
+                _ctx.beginPath()
+                _ctx.arc(_x, _y, _offset, this.firstAngle, this.secondAngle)
+                _ctx.stroke()
+                _ctx.closePath()
+            }
+
+/*
             if(_x < this.points[0].x){
                 // console.log('x is less...')
                 _sAngle = -1 * this.soh 
@@ -202,25 +260,20 @@ export default {
                 // console.log('x is more...')
                 _sAngle = -1 * (-1 * this.soh + 1)
             }
+            */
 
-            _ctx.lineWidth = 3
-            _ctx.strokeStyle = "#000"
-
-            //Draw InnerCircle
-            _ctx.beginPath()
-            _ctx.arc(_x, _y, 25, _sAngle, 0)
-            _ctx.stroke()
-            _ctx.closePath()
 
             _ctx.lineWidth = 1
-
+            /*
             //Draw OverCircle
             _ctx.beginPath()
             _ctx.arc(_midX, _midY, (this.hyp / 2), 0, (Math.PI * 2))
             _ctx.stroke()
             _ctx.closePath()
+            */
 
             // Draw Ticks
+            /*
             for(var i = 0; i <= 10; i ++) {
                 _ctx.beginPath()
                 _ctx.moveTo(_midX, _midY)
@@ -228,6 +281,7 @@ export default {
                 _ctx.stroke()
                 _ctx.closePath()
             }
+            */
         },
         drawTicks(type) {
             let _x = 0
@@ -267,9 +321,9 @@ export default {
 
                 if(type === "y"){
                     if(this.points[1].x < this.points[0].x){
-                        _xsize = _size
+                        _xsize = (_size/100)
                     } else {
-                        _xsize = -1*_size
+                        _xsize = 1 - (_size/100)
                     }
 
                     if(this.points[1].y < this.points[0].y){
@@ -304,11 +358,13 @@ export default {
             _ctx.stroke()
             _ctx.closePath()
 
+            /*
             _ctx.beginPath()
             _ctx.moveTo(_midX, _midY)
             _ctx.lineTo(_midX, _midY - 20)
             _ctx.stroke()
             _ctx.closePath()
+            */
         }
     }
 }
