@@ -3,13 +3,13 @@
     <div id="topContainer">
       <div class="btn">File</div>
       <div class="btn" @click="visible.control = !visible.control; center">Control</div>
-      <div class="btn" @click="visible.brush = !visible.brush">Brush</div>
-      <div class="btn" @click="visible.layers = !visible.layers; test()">Layers</div>
+      <div class="btn" @click="sizeLeft">Brush</div>
+      <div class="btn" @click="sizeRight">Layers</div>
     </div>
     <FSControl v-show="visible.control" />
 
-    <div class="menu left" ref="left_menu" v-if="visible.brush"></div>
-    <div class="menu right" ref="right_menu" v-if="visible.layers" id="layer_menu">
+    <div class="menu left" ref="left_menu" v-show="visible.brush"></div>
+    <div class="menu right" ref="right_menu" v-show="visible.layers" id="layer_menu">
       <layer />
     </div>
     <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container"></div>
@@ -80,8 +80,8 @@ export default {
       setScale: 1,
       visible: {
         control: false,
-        layers: false,
-        brush: false
+        layers: true,
+        brush: true
       },
       temp_scale: 0,
       setRotate: 0,
@@ -94,30 +94,33 @@ export default {
       this.sizeMenus()
     },
     sizeMenus(){
-      if(this.$refs.left_menu){
+      if(this.$refs.left_menu.style.display !== "none"){
         this.sizeLeft()
       }
 
-      if(this.$refs.right_menu){
+      if(this.$refs.right_menu.style.display !== "none"){
         this.sizeRight()
       }
     },
-    test(){
-      this.sizeMenus()
-    },
     sizeRight(){
-      let margin = this.margin
-      let _h = window.innerHeight - margin
-      let _right = this.$refs.right_menu
+      this.visible.layers = !this.visible.layers
+      if(this.$refs.right_menu.style.display !== "none"){
+        let margin = this.margin
+        let _h = window.innerHeight - margin
+        let _right = this.$refs.right_menu
 
-      _right.style.top = (_h / 2) - (_right.clientHeight / 2) + "px"
+        _right.style.top = (_h / 2) - (_right.clientHeight / 2) + "px"
+      }
     },
     sizeLeft(){
-      let margin = this.margin
-      let _h = window.innerHeight - margin
-      let _left = this.$refs.left_menu
+      this.visible.brush = !this.visible.brush
+      if(this.$refs.left_menu.style.display !== "none"){
+        let margin = this.margin
+        let _h = window.innerHeight - margin
+        let _left = this.$refs.left_menu
 
-      _left.style.top = (_h / 2) - (_left.clientHeight / 2) + "px"
+        _left.style.top = (_h / 2) - (_left.clientHeight / 2) + "px"
+      }
     },
     sizeCanvas(){
       let _can = this.canvas_container
@@ -225,12 +228,13 @@ html{
   padding: 10px;
   box-sizing: border-box;
   border-radius: 0px 10px 10px 0px;
-  height: 400px;
+  min-height: 100px;
   width: 60px;
   }
   .right {
     width: 150px;
     border-radius: 10px 0px 0px 10px;
+    height: 400px;
     right: 0px;
     overflow: auto;
     }
