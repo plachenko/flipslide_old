@@ -19,7 +19,7 @@ export default {
             md: false,
             middle: false,
             scaler: 0,
-            rotOffset: 45,
+            rotOffset: 25,
             firstAngle: 0,
             secondAngle: 0,
             firstPoint: {x: 0, y: 0}
@@ -66,6 +66,9 @@ export default {
                 this.draw()
             },
             deep: true
+        },
+        scaler(){
+            this.$eh.$emit('scaler', this.scaler) 
         }
     },
     methods: {
@@ -77,8 +80,14 @@ export default {
             e.preventDefault();
         },
 
-        scrollEvt() {
+        scrollEvt(e) {
             //Add scrolling event functionality
+            let _scrollamt = .01
+            if(e.deltaY > 0){
+                this.scaler += 1 - _scrollamt / 2
+            } else{
+                this.scaler += 1 + _scrollamt / 2
+            }
         },
         dnEvt(e) {
             // Capture the pointer
@@ -112,7 +121,6 @@ export default {
                 }
 
                 Vue.set(this.points, 0, {x: _x, y: _y})
-                this.$eh.$emit('scaler', this.scaler) 
             } else if(this.middle) {
                 _x = (Math.round(e.clientX - this.firstPoint.x))
                 _y = (Math.round(e.clientY - this.firstPoint.y))
@@ -222,6 +230,7 @@ export default {
             let _x = this.points[1].x
             let _y = this.points[1].y
             let _offset = this.rotOffset
+            let roter = 0
 
             //Draw InnerCircle
             if(this.hyp <= _offset){
@@ -255,7 +264,9 @@ export default {
 
                 //Draw InnerCircle
                 _ctx.beginPath()
-                if(this.firstAngle < this.secondAngle){
+
+                roter = Math.round((this.secondAngle - this.firstAngle) * (180 / Math.PI))
+                if(this.firstAngle < this.secondAngle && roter < 0){
                     _ctx.arc(_x, _y, _offset, this.firstAngle, this.secondAngle)
                 } else {
                     _ctx.arc(_x, _y, _offset, this.secondAngle, this.firstAngle)
@@ -264,7 +275,6 @@ export default {
                 _ctx.closePath()
             }
 
-            let roter = Math.round((this.secondAngle - this.firstAngle) * (180 / Math.PI))
 
             this.$eh.$emit('rotater', roter) 
             _ctx.fillText(roter + "DEG", this.points[1].x + 40, this.points[1].y + 20)
