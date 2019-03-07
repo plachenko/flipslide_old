@@ -19,7 +19,7 @@ export default {
             md: false,
             middle: false,
             scaler: 0,
-            rotOffset: 25,
+            rotOffset: 35,
             scaleBuffer: 0,
             firstAngle: 0,
             secondAngle: 0,
@@ -113,9 +113,9 @@ export default {
             if(this.md) {
                 if(Math.abs(this.xDiff) < this.rotOffset + this.scaleBuffer && Math.abs(this.yDiff) < this.rotOffset + this.scaleBuffer){
                     if(this.points[0].x < this.points[1].x){
-                        this.scaler = 1 - (this.hyp / this.rotOffset) / 2
+                        this.scaler = 1 - (this.hyp / this.rotOffset)
                     }else{
-                        this.scaler = 1 + (this.hyp / this.rotOffset) / 2
+                        this.scaler = 1 + (this.hyp / this.rotOffset)
                     }
                 } else {
                     this.scaler = 0

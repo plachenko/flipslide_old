@@ -10,9 +10,11 @@
 
     <div class="menu left" ref="left_menu" v-show="visible.brush"></div>
     <div class="menu right" ref="right_menu" v-show="visible.layers" id="layer_menu">
-      <layer />
+      <layer @changeLayer="changeLayer" />
     </div>
-    <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container"></div>
+    <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
+      <FSLayer :width="width" :height="height" v-for="(layer,idx) in layers" :key="idx" :index="layer.idx" :style="{zIndex: layer.zPosition}" />
+    </div>
     <div id="control_center" @click="center" v-show="visible.control">center</div>
   </div>
 </template>
@@ -21,10 +23,13 @@
 import FSControl from './components/FSControl'
 import layer from './components/interface/layer'
 
+import FSLayer from './components/FSLayer'
+
 export default {
   name: 'app',
   components: {
-    FSControl: FSControl,
+    FSControl,
+    FSLayer,
     layer
   },
   mounted(){
@@ -69,8 +74,10 @@ export default {
     return{
       canvas_container: null,
       width: 0,
+      height: 0,
       scale: 1,
       margin: 20,
+      layers: [],
       translate: {
         x1: 0,
         y1: 0,
@@ -130,6 +137,7 @@ export default {
       let _h = window.innerHeight - margin
 
       this.width = _w
+      this.height = _h
 
       _can.style.width = _w + "px"
       _can.style.height = _h + "px"
@@ -143,6 +151,9 @@ export default {
 
       _can.style.left = _w + "px"
       _can.style.top = _h + "px"
+    },
+    changeLayer(e){
+      this.layers = e
     },
     center(){
       this.setRotate = 0;

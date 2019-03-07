@@ -1,6 +1,6 @@
 <template>
-    <div class="item_container">
-        <div style="position: fixed">
+    <div class="item_container" style="position: relative">
+        <div style="position: fixed;">
             <button @click="addLayer">Add</button>
             <button @click="remLayer">Remove</button>
         </div>
@@ -8,14 +8,14 @@
             :list="layers"
             :disabled="!enabled"
             class="list-group"
+            @update="dragEnd"
             @start="dragging = true"
             @end="dragging = false" >
-            <div class="layer_inner">
-                <div class="layer_item" ref="layer_item" v-for="(layer, idx) in layers" :key="idx" @click="setLayer(layer.idx)" >
-                    <span v-if="layer.idx === currentIdx">_</span>
-                    <span v-if="layer.name">{{layer.name}}</span>
-                    <span v-else>{{"layer " + layer.idx}}</span>
-                </div>
+            <div class="layer_item" ref="layer_item" v-for="(layer, idx) in layers" :key="idx" @click="setLayer(layer.idx)" >
+                <img width="100" height="100" :src="layer.data" >
+                <span v-if="layer.idx === currentIdx">_</span>
+                <span v-if="layer.name">{{layer.name}}</span>
+                <span v-else>{{"layer " + layer.idx}}</span>
             </div>
         </draggable>
     </div>
@@ -32,11 +32,19 @@ export default {
         return{
             currentIdx: 0,
             layers: [
-                { idx: 0, name: "Background" },
+                { 
+                idx: 0, 
+                name: "Background",
+                data: null,
+                zPosition: 0
+                },
             ],
             enabled: true,
             dragging: false
         }
+    },
+    mounted(){
+        this.$eh.$on('imageSet', this.setImage)
     },
     computed: {
         curIdx(){
@@ -44,21 +52,27 @@ export default {
         }
     },
     methods: {
+        dragEnd(e){
+            this.dragging = false
+            this.$emit('changeLayer', this.layers)
+        },
         setLayer(e){
             this.currentIdx = e
             let _el = this.$refs.layer_item[this.currentIdx]
-
-            console.log(this.currentIdx)
+        },
+        setImage(e){
+            this.layers[e.idx].data = e.data
         },
         remLayer(){
-            console.log(this.currentIdx)
             if(this.currentIdx > 0){
                 this.layers.splice(this.curIdx, 1)
+                this.$emit('changeLayer', this.layers)
                 this.currentIdx--
             }
         },
         addLayer(){
             this.layers.unshift({idx: this.layers.length})
+            this.$emit('changeLayer', this.layers)
             this.currentIdx++
         }
     } 
@@ -83,10 +97,10 @@ export default {
     overflow: auto;
 }
 #layer_menu .layer_item {
-  min-height: 100px;
-  width: 100%;
   background-color: #FFF;
   margin: 5px 0px;
+  text-align: center;
+  padding: 5px 0px;
 }
 #layer_menu .item:last-child {
   border-bottom: none;
