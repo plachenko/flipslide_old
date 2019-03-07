@@ -9,11 +9,14 @@
     <FSControl v-show="visible.control" />
 
     <div class="menu left" ref="left_menu" v-show="visible.brush"></div>
-    <div class="menu right" ref="right_menu" v-show="visible.layers" id="layer_menu">
+    <div class="menu right" ref="right_menu" id="layer_menu">
       <layer @changeLayer="changeLayer" />
     </div>
     <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
-      <FSLayer :width="width" :height="height" v-for="(layer,idx) in layers" :key="idx" :index="layer.idx" :style="{zIndex: layer.zPosition}" />
+      <div v-if="!visible.control">
+        <FSLayer v-show="!visible.control" :width="width" :height="height" v-for="(layer,idx) in layers" :key="idx" :index="layer.idx" :style="{zIndex: layer.zPosition}" />
+      </div>
+      <img v-else :src="layers[layers.length-1].data" alt="">
     </div>
     <div id="control_center" @click="center" v-show="visible.control">center</div>
   </div>
@@ -76,7 +79,7 @@ export default {
       width: 0,
       height: 0,
       scale: 1,
-      margin: 20,
+      margin: 0,
       layers: [],
       translate: {
         x1: 0,

@@ -1,8 +1,8 @@
 <template>
     <div class="item_container" style="position: relative">
         <div style="position: fixed;">
-            <button @click="addLayer">Add</button>
-            <button @click="remLayer">Remove</button>
+            <button @click="addLayerEvt">Add</button>
+            <button @click="remLayerEvt">Remove</button>
         </div>
         <draggable
             :list="layers"
@@ -11,12 +11,14 @@
             @update="dragEnd"
             @start="dragging = true"
             @end="dragging = false" >
-            <div class="layer_item" ref="layer_item" v-for="(layer, idx) in layers" :key="idx" @click="setLayer(layer.idx)" >
-                <img width="100" height="100" :src="layer.data" >
+
+            <div class="layer_item" ref="layer_item" v-for="(layer, idx) in layers.slice().reverse()" :key="idx" @click="setLayer(layer.idx)" >
+                <img class="layer_preview" width="100" height="100" :src="layer.data" >
                 <span v-if="layer.idx === currentIdx">_</span>
                 <span v-if="layer.name">{{layer.name}}</span>
                 <span v-else>{{"layer " + layer.idx}}</span>
             </div>
+
         </draggable>
     </div>
 </template>
@@ -31,19 +33,29 @@ export default {
     data(){
         return{
             currentIdx: 0,
-            layers: [
-                { 
-                idx: 0, 
-                name: "Background",
-                data: null,
-                zPosition: 0
-                },
-            ],
+            totalIdx: 0,
+            layers: [],
             enabled: true,
             dragging: false
         }
     },
     mounted(){
+        let _bgLyr = {
+                idx: 0, 
+                name: "Background",
+                data: null,
+                zPosition: 0
+            }
+        this.addLayer( _bgLyr )
+
+        // ++TESTING: Random layer add
+        for(var i = 1; i < 5; i++) {
+            let _idx = this.layers[this.layers.length -1].idx
+            let _rand = Math.round(Math.random()*10 + _idx)
+            this.addLayer({idx: _rand})
+        }
+        // --TESTING
+
         this.$eh.$on('imageSet', this.setImage)
     },
     computed: {
@@ -53,27 +65,46 @@ export default {
     },
     methods: {
         dragEnd(e){
+            let _arr = this.layers.slice().reverse()
             this.dragging = false
             this.$emit('changeLayer', this.layers)
         },
         setLayer(e){
-            this.currentIdx = e
-            let _el = this.$refs.layer_item[this.currentIdx]
-        },
-        setImage(e){
-            this.layers[e.idx].data = e.data
-        },
-        remLayer(){
-            if(this.currentIdx > 0){
-                this.layers.splice(this.curIdx, 1)
-                this.$emit('changeLayer', this.layers)
-                this.currentIdx--
+            if(e !== this.currentIdx){
+                this.currentIdx = e
             }
         },
-        addLayer(){
-            this.layers.unshift({idx: this.layers.length})
+        setImage(e){
+            let _idx = this.layers.findIndex(i => i.idx === e.idx)
+            
+            if(this.layers[_idx]){
+                this.layers[_idx].data = e.data
+            }
+        },
+        addLayer(obj){
+            // let _idx = this.layers.splice().reverse().findIndex(i => i.idx === this.currentIdx)
+            this.layers.push(obj)
+
+            // this.layers.splice(_idx, 0, obj)
+
+            this.setLayer(obj.idx)
             this.$emit('changeLayer', this.layers)
-            this.currentIdx++
+            this.totalIdx ++
+        },
+        remLayer(){
+            let _idx = this.layers.findIndex(i => i.idx === this.currentIdx)
+
+            if(_idx > 0){
+                this.layers.splice(_idx, 1)
+                this.setLayer(this.layers[_idx - 1].idx)
+            }
+        },
+        remLayerEvt(){
+            this.remLayer()
+        },
+        addLayerEvt(){
+            let _lastLyr = this.layers[this.layers.length-1]
+            this.addLayer({idx: this.totalIdx})
         }
     } 
 }
@@ -95,6 +126,9 @@ export default {
 }
 .layer_inner{
     overflow: auto;
+}
+.layer_preview{
+    border: 1px solid;
 }
 #layer_menu .layer_item {
   background-color: #FFF;

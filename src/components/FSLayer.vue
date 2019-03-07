@@ -23,24 +23,41 @@ export default {
         this.can.height = this.height
 
         this.ctx = this.can.getContext('2d')
-        let _col = ""
 
-        for(var i = 0; i< this.width/3; i++){
-            for(var j = 0; j< this.height/3; j++){
-                _col = "rgb("+ 
-                    Math.round(Math.random()*255) + "," + 
-                    Math.round(Math.random()*255) + "," + 
-                    Math.round(Math.random()*255) 
-                +")"
-                this.ctx.fillStyle = _col
-                this.ctx.fillRect(i * 3, j * 3, 3,3)
+        // ++TESTING: Dense and simple fill -- 
+        this._simpleFill()
+        // this._denseFill()
+        // --TESTING
+
+        this.$eh.$emit('imageSet', {'idx':this.index, 'data':this.can.toDataURL()})
+    },
+    methods: {
+        _simpleFill(){
+            let _col = "#FFF"
+            _col = "rgb("+ 
+                Math.round(Math.random()*255) + "," + 
+                Math.round(Math.random()*255) + "," + 
+                Math.round(Math.random()*255) 
+            +")"
+            this.ctx.fillStyle = _col
+            this.ctx.fillRect(0, 0, this.width, this.height)
+        },
+        _denseFill(){
+            let _col = "#FFF"
+            let _size = 5
+            for(var i = 0; i< this.width/_size; i++){
+                for(var j = 0; j< this.height/_size; j++){
+                    _col = "rgb("+ 
+                        Math.round(Math.random()*255) + "," + 
+                        Math.round(Math.random()*255) + "," + 
+                        Math.round(Math.random()*255) 
+                    +")"
+                    this.ctx.fillStyle = _col
+                    this.ctx.fillRect(i * _size, j * _size, _size, _size)
+                }
             }
         }
 
-        let _x = Math.round(Math.random()*100)
-        let _y = Math.round(Math.random()*100)
-        // this.ctx.fillRect(0, 0, this.can.width, this.can.height)
-        this.$eh.$emit('imageSet', {'idx':this.index, 'data':this.can.toDataURL()})
     }
 }
 </script>
