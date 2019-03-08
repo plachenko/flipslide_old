@@ -20,6 +20,7 @@ export default {
     methods: {
 
         dnEvt(e){
+            this.mousePos = {x: e.clientX, y: e.clientY}
             this.$eh.$emit('mousePos', this.mousePos)
             this.md = true
         },

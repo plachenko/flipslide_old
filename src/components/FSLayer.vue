@@ -11,8 +11,15 @@ export default {
         return{
             ctx: null,
             can: null,
+            opacity: 1,
+            size: {w: 5, h: 5},
             testing: false,
-            method: 1
+            method: 1,
+            color: {
+                red: 0,
+                green: 0,
+                blue: 0
+            }
         }
     },
     props:{
@@ -32,11 +39,10 @@ export default {
         // this._denseFill()
         // --TESTING
 
-        this.size = {w: 5, h: 5}
-
         this.$eh.$on('mousePos', this.draw)
         this.$eh.$on('brush', this.brushChange)
         this.$eh.$on('mouseUp', this.drawDone)
+        this.$eh.$on('brushEvt', this.brushEvt)
         // this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
     },
     methods: {
@@ -65,20 +71,35 @@ export default {
                 }
             }
         },
+        brushEvt(e){
+            this.opacity = e.opacity
+            this.size = {w: e.size, h: e.size}
+        },
         brushChange(e){
             this.method = e
         },
         draw(e){
+            let _obj = {
+                x: e.x * this.$eh.scale, y: e.y * this.$eh.scale
+            } 
+            console.log(e.x)
             switch(this.method){
                 case 1:
-                    this.brush(e)
+                    this.brush(_obj)
                     break;
                 case 2:
-                    this.eraser(e)
+                    this.eraser(_obj)
                     break
             }
         },
         brush(e){
+            let _col = "rgb("+ 
+                this.color.red + "," + 
+                this.color.green + "," + 
+                this.color.blue + "," + 
+                this.opacity 
+            +")"
+            this.ctx.fillStyle = _col
             this.ctx.fillRect(e.x, e.y, this.size.w, this.size.h)
         },
         eraser(e){

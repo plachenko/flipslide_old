@@ -84,6 +84,7 @@ export default {
           this.scale = this.setScale - (1 - e)
         }
       }
+      this.$eh.scale = this.scale
     })
   },
   data() {
@@ -182,6 +183,7 @@ export default {
         y1: 0,
         y2: 0
       };
+      this.$eh.scale = this.scale
     }
   }
 }
