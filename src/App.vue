@@ -14,7 +14,13 @@
     </div>
     <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
       <div v-if="!visible.control">
-        <FSLayer v-show="!visible.control" :width="width" :height="height" v-for="(layer,idx) in layers" :key="idx" :index="layer.idx" :style="{zIndex: layer.zPosition}" />
+        <FSLayer 
+          v-show="!visible.control" 
+          :width="width" 
+          :height="height" 
+          v-for="(layer,idx) in layers" :layerObj="layer" 
+          :key="idx" 
+          :style="{zIndex: layer.zPosition}" />
       </div>
       <img v-else :src="layers[layers.length-1].data" alt="">
     </div>

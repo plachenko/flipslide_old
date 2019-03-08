@@ -1,5 +1,6 @@
 <template>
     <div id="canContainer">
+       <div v-if="testing" style="position: absolute; bottom: 100px;">{{JSON.stringify(layerObj)}}</div>
        <canvas ref='can' style="opacity: 1"></canvas> 
     </div>
 </template>
@@ -9,13 +10,14 @@ export default {
     data(){
         return{
             ctx: null,
-            can: null
+            can: null,
+            testing: false
         }
     },
     props:{
         width: Number,
         height: Number,
-        index: Number
+        layerObj: Object
     },
     mounted(){
         this.can = this.$refs.can
@@ -25,11 +27,11 @@ export default {
         this.ctx = this.can.getContext('2d')
 
         // ++TESTING: Dense and simple fill -- 
-        this._simpleFill()
+        // this._simpleFill()
         // this._denseFill()
         // --TESTING
 
-        this.$eh.$emit('imageSet', {'idx':this.index, 'data':this.can.toDataURL()})
+        this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
     },
     methods: {
         _simpleFill(){
