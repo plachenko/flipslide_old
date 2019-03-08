@@ -7,11 +7,17 @@
         <input v-model="brush.opacity" class="input" min="0" step=".01" max="1" type="number" />
         <span>Size:</span><br />
         <input v-model="brush.size" class="input" min="1" type="number" />
+        <color />
     </div>
 </template>
 <script>
+import color from './color'
+
 export default {
     name: "brush",
+    components:{
+      color
+    },
     mounted(){
 
     },
@@ -47,12 +53,11 @@ export default {
 <style>
 .input {
     width: 50px;
-
 }
 .brush_btn{
     height: 40px;
     width: 10px;
     cursor: pointer;
 }
-    
+
 </style>
