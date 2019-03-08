@@ -15,6 +15,8 @@ export default {
             size: {w: 5, h: 5},
             testing: false,
             method: 1,
+            stroke: [],
+            strokes: [],
             color: {
                 red: 0,
                 green: 0,
@@ -88,7 +90,6 @@ export default {
             let _obj = {
                 x: e.x * this.$eh.scale, y: e.y * this.$eh.scale
             }
-            console.log(e.x)
             switch(this.method){
                 case 1:
                     this.brush(_obj)
@@ -97,6 +98,8 @@ export default {
                     this.eraser(_obj)
                     break
             }
+
+            this.stroke.push(e)
         },
         brush(e){
             let _col = "rgb("+
@@ -112,6 +115,10 @@ export default {
             this.ctx.clearRect(e.x, e.y, this.size.w, this.size.h)
         },
         drawDone(){
+            this.strokes.push(this.stroke)
+
+            this.stroke = []
+            this.$eh.$emit('actions', this.strokes)
             this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
         }
     }
