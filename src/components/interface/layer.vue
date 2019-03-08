@@ -13,7 +13,8 @@
             @end="dragging = false" >
 
             <div class="layer_item" ref="layer_item" v-for="(layer, idx) in reverseList" :key="idx" @click="setLayer(layer.idx)" >
-                <img class="layer_preview" width="100" height="100" :src="layer.data" >
+                <img v-if="layer.data" class="layer_preview" width="100" height="100" :src="layer.data" >
+                <div v-else style="position: relative; height: 100px; width: 100px; border 1px solid;"></div>
                 <span v-if="layer.idx === currentIdx">_</span>
                 <span v-if="layer.name">{{layer.name}}</span>
                 <span v-else>{{"layer " + layer.idx}}</span>
