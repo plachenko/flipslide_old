@@ -1,6 +1,6 @@
 <template>
     <div id="canContainer">
-       <div style="position: absolute; bottom: 100px;">{{JSON.stringify(layerObj)}}</div>
+       <div v-if="testing" style="position: absolute; bottom: 100px;">{{JSON.stringify(layerObj)}}</div>
        <canvas ref='can' style="opacity: 1"></canvas> 
     </div>
 </template>
@@ -10,7 +10,8 @@ export default {
     data(){
         return{
             ctx: null,
-            can: null
+            can: null,
+            testing: false
         }
     },
     props:{
@@ -26,7 +27,7 @@ export default {
         this.ctx = this.can.getContext('2d')
 
         // ++TESTING: Dense and simple fill -- 
-        this._simpleFill()
+        // this._simpleFill()
         // this._denseFill()
         // --TESTING
 

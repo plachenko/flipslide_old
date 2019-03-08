@@ -12,7 +12,7 @@
             @start="dragging = true"
             @end="dragging = false" >
 
-            <div class="layer_item" ref="layer_item" v-for="(layer, idx) in layers.slice().reverse()" :key="idx" @click="setLayer(layer.idx)" >
+            <div class="layer_item" ref="layer_item" v-for="(layer, idx) in reverseList" :key="idx" @click="setLayer(layer.idx)" >
                 <img class="layer_preview" width="100" height="100" :src="layer.data" >
                 <span v-if="layer.idx === currentIdx">_</span>
                 <span v-if="layer.name">{{layer.name}}</span>
@@ -49,18 +49,18 @@ export default {
         this.addLayer( _bgLyr )
 
         // ++TESTING: Random layer add
-        for(var i = 1; i < 5; i++) {
-            let _idx = this.layers[this.layers.length -1].idx
-            let _rand = Math.round(Math.random()*10 + _idx)
-            this.addLayer({idx: _rand})
-        }
+        // for(var i = 1; i < 5; i++) {
+        //     let _idx = this.layers[this.layers.length -1].idx
+        //     let _rand = Math.round(Math.random()*10 + _idx)
+        //     this.addLayer({idx: _rand})
+        // }
         // --TESTING
 
         this.$eh.$on('imageSet', this.setImage)
     },
     computed: {
-        curIdx(){
-            return (this.layers.length-1) - this.currentIdx
+        reverseList(){
+            return this.layers.slice().reverse()
         }
     },
     methods: {
@@ -97,6 +97,7 @@ export default {
             if(_idx > 0){
                 this.layers.splice(_idx, 1)
                 this.setLayer(this.layers[_idx - 1].idx)
+                this.$emit('changeLayer', this.layers)
             }
         },
         remLayerEvt(){
