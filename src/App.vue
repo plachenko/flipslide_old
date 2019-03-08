@@ -6,14 +6,17 @@
       <div class="btn" @click="sizeLeft">Brush</div>
       <div class="btn" @click="sizeRight">Layers</div>
     </div>
+    <FSMouseCap v-show="!visible.control" />
     <FSControl v-show="visible.control" />
 
-    <div class="menu left" ref="left_menu" v-show="visible.brush"></div>
+    <div class="menu left" ref="left_menu" v-show="visible.brush">
+      <brush />
+    </div>
     <div class="menu right" ref="right_menu" id="layer_menu">
       <layer @changeLayer="changeLayer" />
     </div>
     <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
-      <div v-if="!visible.control">
+      <div v-show="!visible.control">
         <FSLayer 
           v-show="!visible.control" 
           :width="width" 
@@ -22,7 +25,7 @@
           :key="idx" 
           :style="{zIndex: layer.zPosition}" />
       </div>
-      <img v-else :src="layers[layers.length-1].data" alt="">
+      <img v-show="visible.control" v-if="layers[layers.length-1]" :src="layers[layers.length-1].data" alt="">
     </div>
     <div id="control_center" @click="center" v-show="visible.control">center</div>
   </div>
@@ -31,15 +34,19 @@
 <script>
 import FSControl from './components/FSControl'
 import layer from './components/interface/layer'
+import brush from './components/interface/brush'
 
 import FSLayer from './components/FSLayer'
+import FSMouseCap from './components/FSMouseCap'
 
 export default {
   name: 'app',
   components: {
     FSControl,
     FSLayer,
-    layer
+    FSMouseCap,
+    layer,
+    brush
   },
   mounted(){
     this.canvas_container = this.$refs.can
@@ -77,6 +84,7 @@ export default {
           this.scale = this.setScale - (1 - e)
         }
       }
+      this.$eh.scale = this.scale
     })
   },
   data() {
@@ -175,6 +183,7 @@ export default {
         y1: 0,
         y2: 0
       };
+      this.$eh.scale = this.scale
     }
   }
 }

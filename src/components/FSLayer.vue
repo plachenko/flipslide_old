@@ -11,7 +11,15 @@ export default {
         return{
             ctx: null,
             can: null,
-            testing: false
+            opacity: 1,
+            size: {w: 5, h: 5},
+            testing: false,
+            method: 1,
+            color: {
+                red: 0,
+                green: 0,
+                blue: 0
+            }
         }
     },
     props:{
@@ -31,7 +39,11 @@ export default {
         // this._denseFill()
         // --TESTING
 
-        this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
+        this.$eh.$on('mousePos', this.draw)
+        this.$eh.$on('brush', this.brushChange)
+        this.$eh.$on('mouseUp', this.drawDone)
+        this.$eh.$on('brushEvt', this.brushEvt)
+        // this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
     },
     methods: {
         _simpleFill(){
@@ -58,8 +70,44 @@ export default {
                     this.ctx.fillRect(i * _size, j * _size, _size, _size)
                 }
             }
+        },
+        brushEvt(e){
+            this.opacity = e.opacity
+            this.size = {w: e.size, h: e.size}
+        },
+        brushChange(e){
+            this.method = e
+        },
+        draw(e){
+            let _obj = {
+                x: e.x * this.$eh.scale, y: e.y * this.$eh.scale
+            } 
+            console.log(e.x)
+            switch(this.method){
+                case 1:
+                    this.brush(_obj)
+                    break;
+                case 2:
+                    this.eraser(_obj)
+                    break
+            }
+        },
+        brush(e){
+            let _col = "rgb("+ 
+                this.color.red + "," + 
+                this.color.green + "," + 
+                this.color.blue + "," + 
+                this.opacity 
+            +")"
+            this.ctx.fillStyle = _col
+            this.ctx.fillRect(e.x, e.y, this.size.w, this.size.h)
+        },
+        eraser(e){
+            this.ctx.clearRect(e.x, e.y, this.size.w, this.size.h)
+        },
+        drawDone(){
+            this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
         }
-
     }
 }
 </script>
