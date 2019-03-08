@@ -1,5 +1,6 @@
 <template>
     <div id="canContainer">
+       <div style="position: absolute; bottom: 100px;">{{JSON.stringify(layerObj)}}</div>
        <canvas ref='can' style="opacity: 1"></canvas> 
     </div>
 </template>
@@ -15,7 +16,7 @@ export default {
     props:{
         width: Number,
         height: Number,
-        index: Number
+        layerObj: Object
     },
     mounted(){
         this.can = this.$refs.can
@@ -29,7 +30,7 @@ export default {
         // this._denseFill()
         // --TESTING
 
-        this.$eh.$emit('imageSet', {'idx':this.index, 'data':this.can.toDataURL()})
+        this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
     },
     methods: {
         _simpleFill(){
