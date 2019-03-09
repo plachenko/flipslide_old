@@ -47,6 +47,7 @@ export default {
 
         this.$eh.$on('mousePos', this.draw)
         this.$eh.$on('brush', this.brushChange)
+        this.$eh.$on('mouseDn', this.drawStart)
         this.$eh.$on('mouseUp', this.drawDone)
         this.$eh.$on('brushEvt', this.brushEvt)
         this.$eh.$on('colorEvt', this.colorEvt)
@@ -85,6 +86,9 @@ export default {
         colorEvt(e){
           this.color = e
         },
+        drawStart(e){
+          this.stroke.push(e)
+        },
         brushEvt(e){
             this.opacity = e.opacity
             this.size = {w: e.size, h: e.size}
@@ -94,8 +98,10 @@ export default {
         },
         draw(e){
             let _obj = {
-                x: e.x * this.$eh.scale, y: e.y * this.$eh.scale
+                x: e.x,
+                y: e.y
             }
+            this.stroke.push(e)
             switch(this.method){
                 case 1:
                     this.brush(_obj)
@@ -104,19 +110,85 @@ export default {
                     this.eraser(_obj)
                     break
             }
-
-
-            this.stroke.push(e)
         },
         brush(e){
-            let _col = "rgb("+
-                this.color.red + "," +
-                this.color.green + "," +
-                this.color.blue + "," +
-                this.opacity
-            +")"
-            this.ctx.fillStyle = _col
-            this.ctx.fillRect(e.x, e.y, this.size.w, this.size.h)
+          let _col = "rgb("+
+              this.color.red + "," +
+              this.color.green + "," +
+              this.color.blue + "," +
+              this.opacity
+          +")"
+          this.ctx.fillStyle = _col
+
+          let ctx = this.ctx
+
+          let _strk = this.stroke
+
+          let pnt = _strk[_strk.length-1]
+          let pnt_pre = _strk[_strk.length-2]
+
+          console.log(pnt, _strk)
+          // Check for 'gaps' in the stroke and fill in between
+          let xDiff = pnt.x - pnt_pre.x
+          let yDiff = pnt.y - pnt_pre.y
+          let size = this.size
+
+          let slope = yDiff / xDiff
+          let m = isFinite(slope) ? slope : 0
+
+          var point1 = pnt_pre
+          var point2 = pnt
+          var endX = 0
+          var endY = 0
+
+          if(Math.abs(xDiff) < 1) {
+            var _y = 0
+            var _x = pnt.x
+            var flip = 1
+
+            if(point2.y > point1.y){
+              flip = -1
+            } else {
+              flip = 1
+            }
+
+            for(var i = 0; i < Math.abs(yDiff); i += .1){
+              _y = pnt.y + i * flip
+
+              this.ctx.fillRect(_x, _y, this.size.w, this.size.h)
+            }
+          }
+
+          for(var i = 0; i < Math.abs(xDiff); i += .01) {
+
+            var xpos = 0
+            var ypos = 0
+            var _m = 0
+            var _xflip = 0
+
+            if(point2.x < point1.x) {
+              xpos = -1 * i
+              _xflip = 1
+            } else {
+              xpos = i
+              _xflip = -1
+            }
+
+            if(point2.y > point1.y) {
+              ypos = -1 * i
+              _m = m
+            } else {
+              ypos = i
+              _m = -1 * m
+            }
+
+
+            var _x = point1.x + xpos
+            var _y = point1.y + ypos * (_xflip * _m)
+
+
+            this.ctx.fillRect(_x, _y, this.size.w, this.size.h)
+          }
         },
         undo(){
           if(this.historyPosition > 0){
