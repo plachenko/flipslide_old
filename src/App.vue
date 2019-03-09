@@ -12,17 +12,22 @@
     <div class="menu left" ref="left_menu" v-show="visible.brush">
       <brush />
     </div>
-    <div class="menu right" ref="right_menu" id="layer_menu">
+    <div class="menu right" ref="right_menu" v-show="visible.layers" id="layer_menu">
       <layer @changeLayer="changeLayer" />
     </div>
+
+    <div>
+      <history />
+    </div>
+
     <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
       <div v-show="!visible.control">
-        <FSLayer 
-          v-show="!visible.control" 
-          :width="width" 
-          :height="height" 
-          v-for="(layer,idx) in layers" :layerObj="layer" 
-          :key="idx" 
+        <FSLayer
+          v-show="!visible.control"
+          :width="width"
+          :height="height"
+          v-for="(layer,idx) in layers" :layerObj="layer"
+          :key="idx"
           :style="{zIndex: layer.zPosition}" />
       </div>
       <img v-show="visible.control" v-if="layers[layers.length-1]" :src="layers[layers.length-1].data" alt="">
@@ -35,6 +40,7 @@
 import FSControl from './components/FSControl'
 import layer from './components/interface/layer'
 import brush from './components/interface/brush'
+import history from './components/interface/history'
 
 import FSLayer from './components/FSLayer'
 import FSMouseCap from './components/FSMouseCap'
@@ -46,7 +52,8 @@ export default {
     FSLayer,
     FSMouseCap,
     layer,
-    brush
+    brush,
+    history
   },
   mounted(){
     this.canvas_container = this.$refs.can
@@ -206,25 +213,25 @@ html{
   }
 
 #topContainer{
-  margin: 0px auto; 
-  width: 500px; 
+  margin: 0px auto;
+  width: 500px;
   height: 40px;
   }
   #topContainer .btn{
-    box-sizing: border-box; 
+    box-sizing: border-box;
     user-select: none;
     cursor: pointer;
     position: relative;
-    float: left; 
+    float: left;
     background-color:#FFF;
 
     z-index: 9999;
-    min-width:100px; 
-    height: 100%; 
-    padding:10px; 
+    min-width:100px;
+    height: 100%;
+    padding:10px;
 
     font-weight: bold;
-    text-align: center; 
+    text-align: center;
 
     border: 1px solid;
     border-left: 1px dashed;

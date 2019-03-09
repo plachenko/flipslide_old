@@ -15,6 +15,10 @@ export default {
             size: {w: 5, h: 5},
             testing: false,
             method: 1,
+            historyPosition: 0,
+            stroke: [],
+            strokes: [],
+            strokesTmp: [],
             color: {
                 red: 0,
                 green: 0,
@@ -46,7 +50,9 @@ export default {
         this.$eh.$on('mouseUp', this.drawDone)
         this.$eh.$on('brushEvt', this.brushEvt)
         this.$eh.$on('colorEvt', this.colorEvt)
-        // this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
+
+        this.$eh.$on('undo', this.undo)
+        this.$eh.$on('redo', this.redo)
     },
     methods: {
         _simpleFill(){
@@ -58,6 +64,7 @@ export default {
             +")"
             this.ctx.fillStyle = _col
             this.ctx.fillRect(0, 0, this.width, this.height)
+            this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
         },
         _denseFill(){
             let _col = "#FFF"
@@ -73,6 +80,7 @@ export default {
                     this.ctx.fillRect(i * _size, j * _size, _size, _size)
                 }
             }
+            this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
         },
         colorEvt(e){
           this.color = e
@@ -88,7 +96,6 @@ export default {
             let _obj = {
                 x: e.x * this.$eh.scale, y: e.y * this.$eh.scale
             }
-            console.log(e.x)
             switch(this.method){
                 case 1:
                     this.brush(_obj)
@@ -97,6 +104,9 @@ export default {
                     this.eraser(_obj)
                     break
             }
+
+
+            this.stroke.push(e)
         },
         brush(e){
             let _col = "rgb("+
@@ -108,11 +118,57 @@ export default {
             this.ctx.fillStyle = _col
             this.ctx.fillRect(e.x, e.y, this.size.w, this.size.h)
         },
+        undo(){
+          if(this.historyPosition > 0){
+            this.historyPosition--
+
+            this.strokesTmp = this.strokes.slice()
+            this.strokesTmp.splice(this.historyPosition, this.strokes.length)
+
+            this.redraw()
+          }
+        },
+        redo(){
+          if(this.historyPosition < this.strokes.length){
+
+            this.historyPosition++
+
+            this.strokesTmp = this.strokes.slice()
+            this.strokesTmp.splice(this.historyPosition, this.strokes.length)
+
+            this.redraw()
+          }
+        },
         eraser(e){
             this.ctx.clearRect(e.x, e.y, this.size.w, this.size.h)
         },
+        redraw(){
+          this.clear()
+          this.strokesTmp.forEach((s) => {
+            this.drawStroke(s)
+          })
+        },
+        clear(){
+          this.ctx.clearRect(0,0,this.width, this.height)
+        },
+        drawStroke(stroke){
+          stroke.forEach((p) => {
+            this.brush(p)
+          })
+        },
         drawDone(){
-            this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
+          if(this.strokesTmp.length > 0 ){
+            this.strokes = this.strokesTmp.slice()
+            this.historyPosition = this.strokes.length
+            this.strokesTmp = []
+          }
+
+          this.strokes.push(this.stroke)
+          this.historyPosition++
+
+          this.stroke = []
+          this.$eh.$emit('actions', this.strokes)
+          this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
         }
     }
 }
