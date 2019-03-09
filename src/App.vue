@@ -1,7 +1,7 @@
 <template>
   <div id="app" onresize="resizer()">
     <div id="topContainer">
-      <div class="btn">File</div>
+      <div class="btn" @click="visible.io = !visible.io">File</div>
       <div class="btn" @click="visible.control = !visible.control; center">Control</div>
       <div class="btn" @click="sizeLeft">Brush</div>
       <div class="btn" @click="sizeRight">Layers</div>
@@ -16,13 +16,13 @@
       <layer @changeLayer="changeLayer" />
     </div>
 
-    <div>
-      <history />
-    </div>
+    <io v-show="visible.io" @openFile="openFile" @saveFile="saveFile" />
+    <history v-show="visible.io" />
 
     <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
       <div v-show="!visible.control">
         <FSLayer
+          ref="inner_can"
           v-show="!visible.control"
           :width="width"
           :height="height"
@@ -41,6 +41,7 @@ import FSControl from './components/FSControl'
 import layer from './components/interface/layer'
 import brush from './components/interface/brush'
 import history from './components/interface/history'
+import io from './components/interface/io'
 
 import FSLayer from './components/FSLayer'
 import FSMouseCap from './components/FSMouseCap'
@@ -53,7 +54,8 @@ export default {
     FSMouseCap,
     layer,
     brush,
-    history
+    history,
+    io
   },
   mounted(){
     this.canvas_container = this.$refs.can
@@ -112,7 +114,8 @@ export default {
       visible: {
         control: false,
         layers: true,
-        brush: true
+        brush: true,
+        io: false
       },
       temp_scale: 0,
       setRotate: 0,
@@ -120,6 +123,26 @@ export default {
     }
   },
   methods: {
+    openFile(e){
+      var _img = new Image()
+      var _ctx = this.$refs.inner_can[0].ctx
+      var reader = new FileReader()
+
+      reader.readAsDataURL(e)
+      reader.addEventListener('load', (ev)=>{
+        _img.src = ev.target.result
+      })
+
+      _img.onload = (e) => {
+        _ctx.drawImage(_img,_img.width,_img.height)
+      }
+    },
+    saveFile(){
+      let _can = this.$refs.inner_can[0].can
+      let _img = _can.toDataURL("image/png").replace("image/png", "image/octet-stream")
+
+      window.location.href = _img
+    },
     resizeEvt () {
       this.centerCanvas()
       this.sizeMenus()

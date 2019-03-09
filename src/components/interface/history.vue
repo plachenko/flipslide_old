@@ -19,7 +19,6 @@ export default {
   methods: {
     actions(e){
       this.actionIdx = e.length
-      console.log('adding.')
     },
     undo(){
       if(this.actionIdx > 0){
