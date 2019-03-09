@@ -2,30 +2,20 @@
 
 Welcome to FlipSlide, a webapp that focuses on Illustration and Animation. 
 
-Current Build can be found here: https://plachenko.github.io/flipslide/
+## ALPHA 1 BUILD
+https://plachenko.github.io/flipslide/
 
-## Project setup
+## Main NPM Commands
+Install commands should show in the 
 ```
 npm install
-```
-
-### Compiles and hot-reloads for development
-```
 npm run serve
-```
-
-### Compiles and minifies for production
-```
 npm run build
 ```
 
 ### Run your tests
 ```
 npm run test
-```
-
-### Lints and fixes files
-```
 npm run lint
 ```
 
