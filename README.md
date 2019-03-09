@@ -1,4 +1,4 @@
-# flipslide
+# FlipSlide
 
 Welcome to FlipSlide, a webapp that focuses on Illustration and Animation. 
 
