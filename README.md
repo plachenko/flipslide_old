@@ -1,4 +1,8 @@
-# flipslide_fe
+# flipslide
+
+Welcome to FlipSlide, a webapp that focuses on Illustration and Animation. 
+
+Current Build can be found here: https://plachenko.github.io/flipslide/
 
 ## Project setup
 ```
