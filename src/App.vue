@@ -16,12 +16,13 @@
       <layer @changeLayer="changeLayer" />
     </div>
 
-    <io v-show="visible.io" />
-    <history />
+    <io v-show="visible.io" @openFile="openFile" @saveFile="saveFile" />
+    <history v-show="visible.io" />
 
     <div ref="can" :style="{transform: 'translate('+translate.x1+'px,'+translate.y1+'px) rotate('+rotation+'deg'+') scale('+scale+')'}" id="canvas-container">
       <div v-show="!visible.control">
         <FSLayer
+          ref="inner_can"
           v-show="!visible.control"
           :width="width"
           :height="height"
@@ -114,7 +115,7 @@ export default {
         control: false,
         layers: true,
         brush: true,
-        io: true
+        io: false
       },
       temp_scale: 0,
       setRotate: 0,
@@ -122,6 +123,26 @@ export default {
     }
   },
   methods: {
+    openFile(e){
+      var _img = new Image()
+      var _ctx = this.$refs.inner_can[0].ctx
+      var reader = new FileReader()
+
+      reader.readAsDataURL(e)
+      reader.addEventListener('load', (ev)=>{
+        _img.src = ev.target.result
+      })
+
+      _img.onload = (e) => {
+        _ctx.drawImage(_img,_img.width,_img.height)
+      }
+    },
+    saveFile(){
+      let _can = this.$refs.inner_can[0].can
+      let _img = _can.toDataURL("image/png").replace("image/png", "image/octet-stream")
+
+      window.location.href = _img
+    },
     resizeEvt () {
       this.centerCanvas()
       this.sizeMenus()

@@ -4,7 +4,7 @@
 
     <form action="#" ref="fileInp">
     </form>
-    <input id="file" type="file" ref="file" />
+    <input @change="fileChange" id="file" type="file" ref="file" />
 
     <div @click="save">Save</div>
   </div>
@@ -17,25 +17,15 @@ export default {
       file: null
     }
   },
-  watch: {
-    file(e){
-      console.log(e)
-    }
-  },
   methods: {
     open(){
-      let _inputF = this.$refs.fileInp
-      let _input = this.$refs.file
-      let _img
-
-      _input.click()
-      this.file = _input.files[0]
-      window.setTimeout(()=>{
-        console.log(_img)
-      }, 3000)
+      this.$refs.file.click()
     },
     save(){
-
+      this.$emit('saveFile')
+    },
+    fileChange(e){
+      this.$emit('openFile', e.target.files[0])
     }
   }
 }
