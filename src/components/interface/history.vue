@@ -1,6 +1,5 @@
 <template>
   <div id="actionBar">
-    <span>Action index: {{ actionIdx }}</span>
     <div @click="undo" class="actionBtn">undo</div>
     <div @click="redo" class="actionBtn">redo</div>
   </div>
@@ -18,18 +17,18 @@ export default {
     this.$eh.$on('actions', this.actions)
   },
   methods: {
-    actions(){
-      this.actionIdx = this.$eh.actions.length - 1
-      if(this.actionIdx < this.lastIdx){
-
-      }
+    actions(e){
+      this.actionIdx = e.length
+      console.log('adding.')
     },
     undo(){
       if(this.actionIdx > 0){
+        this.$eh.$emit('undo')
         this.actionIdx --
       }
     },
     redo(){
+      this.$eh.$emit('redo')
       this.actionIdx ++
     }
   }
