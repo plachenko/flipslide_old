@@ -20,7 +20,7 @@ export default {
 
         dnEvt(e){
             this.mousePos = {x: e.clientX, y: e.clientY}
-            this.$eh.$emit('mousePos', this.mousePos)
+            this.$eh.$emit('mouseDn', this.mousePos)
             this.md = true
         },
         mvEvt(e){
