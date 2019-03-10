@@ -16,7 +16,7 @@ npm run test
 npm run lint
 ```
 
-##Dependencies
+## Dependencies
 This project uses:
 - [vue](https://github.com/vuejs/vue)
 - [vuedraggable](https://github.com/SortableJS/Vue.Draggable)
