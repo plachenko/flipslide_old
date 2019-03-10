@@ -119,15 +119,16 @@ export default {
               this.opacity
           +")"
           this.ctx.fillStyle = _col
-
+          this.strokeEvt()
+        },
+        strokeEvt(){
           let ctx = this.ctx
 
-          let _strk = this.stroke
+          let _strk = this.stroke.slice()
 
           let pnt = _strk[_strk.length-1]
           let pnt_pre = _strk[_strk.length-2]
 
-          console.log(pnt, _strk)
           // Check for 'gaps' in the stroke and fill in between
           let xDiff = pnt.x - pnt_pre.x
           let yDiff = pnt.y - pnt_pre.y
@@ -155,7 +156,12 @@ export default {
             for(var i = 0; i < Math.abs(yDiff); i += .1){
               _y = pnt.y + i * flip
 
-              this.ctx.fillRect(_x, _y, this.size.w, this.size.h)
+              if(this.method === 1){
+                this.ctx.fillRect(_x, _y, this.size.w, this.size.h)
+              } else {
+                this.ctx.clearRect(_x, _y, this.size.w, this.size.h)
+              }
+
             }
           }
 
@@ -182,13 +188,16 @@ export default {
               _m = -1 * m
             }
 
-
             var _x = point1.x + xpos
             var _y = point1.y + ypos * (_xflip * _m)
 
-
-            this.ctx.fillRect(_x, _y, this.size.w, this.size.h)
+            if(this.method === 1){
+              this.ctx.fillRect(_x, _y, this.size.w, this.size.h)
+            } else {
+              this.ctx.clearRect(_x, _y, this.size.w, this.size.h)
+            }
           }
+
         },
         undo(){
           if(this.historyPosition > 0){
@@ -213,6 +222,7 @@ export default {
         },
         eraser(e){
             this.ctx.clearRect(e.x, e.y, this.size.w, this.size.h)
+            this.strokeEvt()
         },
         redraw(){
           this.clear()
