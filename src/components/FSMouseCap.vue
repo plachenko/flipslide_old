@@ -17,7 +17,6 @@ export default {
     mounted(){
     },
     methods: {
-
         dnEvt(e){
             this.mousePos = {x: e.clientX, y: e.clientY}
             this.$eh.$emit('mouseDn', this.mousePos)

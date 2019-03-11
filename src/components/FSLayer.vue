@@ -19,6 +19,8 @@ export default {
             stroke: [],
             strokes: [],
             strokesTmp: [],
+            frames: [],
+            currentFrame: 0,
             color: {
                 red: 0,
                 green: 0,
@@ -54,6 +56,9 @@ export default {
 
         this.$eh.$on('undo', this.undo)
         this.$eh.$on('redo', this.redo)
+
+        this.$eh.$on('next', () => { this.currentFrame++;  this.drawFrame() })
+        this.$eh.$on('prev', () => { this.currentFrame--;  this.drawFrame() })
     },
     methods: {
         _simpleFill(){
@@ -104,10 +109,10 @@ export default {
             this.stroke.push(e)
             switch(this.method){
                 case 1:
-                    this.brush(_obj)
+                    this.brush([_obj])
                     break;
                 case 2:
-                    this.eraser(_obj)
+                    this.eraser([_obj])
                     break
             }
         },
@@ -119,12 +124,24 @@ export default {
               this.opacity
           +")"
           this.ctx.fillStyle = _col
-          this.strokeEvt()
+
+          if(e.length > 1){
+            this.strokeEvt(e)
+          } else {
+            console.log('hack!')
+            this.strokeEvt()
+          }
         },
-        strokeEvt(){
+        strokeEvt(e){
           let ctx = this.ctx
 
-          let _strk = this.stroke.slice()
+console.log(e)
+          if(e){
+            let _strk = e.slice()
+          } else {
+            let _strk = this.stroke.slice()
+          }
+
 
           let pnt = _strk[_strk.length-1]
           let pnt_pre = _strk[_strk.length-2]
@@ -234,8 +251,10 @@ export default {
           this.ctx.clearRect(0,0,this.width, this.height)
         },
         drawStroke(stroke){
-          stroke.forEach((p) => {
-            this.brush(p)
+
+          stroke[0].forEach((p) => {
+            console.log(p)
+            // this.brush(p)
           })
         },
         drawDone(){
@@ -245,12 +264,26 @@ export default {
             this.strokesTmp = []
           }
 
-          this.strokes.push(this.stroke)
+          this.strokes.push(this.stroke.slice())
+          this.setFrame(this.strokes)
+
           this.historyPosition++
 
           this.stroke = []
           this.$eh.$emit('actions', this.strokes)
           this.$eh.$emit('imageSet', {'idx':this.layerObj.idx, 'data':this.can.toDataURL()})
+        },
+        setFrame(e){
+          this.frames[this.currentFrame] = e.slice()
+        },
+        drawFrame(){
+          let _frame = this.frames[this.currentFrame]
+          this.$eh.currentFrame = this.currentFrame;
+
+          this.clear()
+          if(_frame){
+            this.drawStroke(_frame)
+          }
         }
     }
 }

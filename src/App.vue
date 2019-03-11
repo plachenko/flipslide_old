@@ -16,6 +16,8 @@
       <layer @changeLayer="changeLayer" />
     </div>
 
+    <frames :curFrame="$eh.curFrame" />
+
     <io v-show="visible.io" @openFile="openFile" @saveFile="saveFile" />
     <history v-show="visible.io" />
 
@@ -39,6 +41,7 @@
 <script>
 import FSControl from './components/FSControl'
 import layer from './components/interface/layer'
+import frames from './components/interface/frames'
 import brush from './components/interface/brush'
 import history from './components/interface/history'
 import io from './components/interface/io'
@@ -53,6 +56,7 @@ export default {
     FSLayer,
     FSMouseCap,
     layer,
+    frames,
     brush,
     history,
     io
