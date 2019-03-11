@@ -6,7 +6,8 @@
       <div class="btn" @click="sizeLeft">Brush</div>
       <div class="btn" @click="sizeRight">Layers</div>
     </div>
-    <FSMouseCap v-show="!visible.control" />
+
+    <FSMouseCap id="FSPointer" />
     <FSControl v-show="visible.control" />
 
     <div class="menu left" ref="left_menu" v-show="visible.brush">
