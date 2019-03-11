@@ -2,7 +2,7 @@
 
 Welcome to FlipSlide, a webapp that focuses on Illustration and Animation. 
 
-[Current build - Alpha 1](https://plachenko.github.io/)
+[Try it out! - (Alpha 1 Build)](https://plachenko.github.io/)
 
 ## Main NPM Commands
 Install commands should show in the CLI. 
